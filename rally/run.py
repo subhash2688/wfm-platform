@@ -24,7 +24,7 @@ from config import UPLOAD_FOLDER, REMINDER_HOUR
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'wfm-rally-volunteer-2024'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'wfm-rally-volunteer-2024')
 
     # Register all blueprints
     for bp in all_blueprints:
@@ -90,7 +90,8 @@ def main():
     print('  http://localhost:5002')
     print()
 
-    app.run(host='0.0.0.0', port=5002, debug=False)
+    port = int(os.environ.get('PORT', 5002))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == '__main__':

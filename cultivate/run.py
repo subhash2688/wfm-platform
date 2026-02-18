@@ -21,7 +21,7 @@ from config import EXCEL_PATH
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = 'wfm-corporate-giving-2024'
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'wfm-corporate-giving-2024')
 
     # Register all blueprints
     for bp in all_blueprints:
@@ -55,7 +55,8 @@ def main():
     print('  http://localhost:5001')
     print()
 
-    app.run(host='127.0.0.1', port=5001, debug=False)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == '__main__':
