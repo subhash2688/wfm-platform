@@ -1,0 +1,133 @@
+{% extends "base_mobile.html" %}
+
+{% block content %}
+<div class="vol-page">
+
+  {% if today_items %}
+  <h2 class="vol-greeting">You're on today, {{ volunteer.first_name }}.</h2>
+  <p class="vol-page-desc">{{ today_items|length }} shift{{ 's' if today_items|length != 1 }} happening now</p>
+  {% elif tomorrow_items %}
+  <h2 class="vol-greeting">Hi, {{ volunteer.first_name }}!</h2>
+  <p class="vol-page-desc">You've got a shift tomorrow. Browse more or check your schedule.</p>
+  {% else %}
+  <h2 class="vol-greeting">Hi, {{ volunteer.first_name }}!</h2>
+  <p class="vol-page-desc">Find a shift and sign up</p>
+  {% endif %}
+
+  <!-- Shift day card -->
+  {% if today_items %}
+  <div class="vol-today-section">
+    {% for item in today_items %}
+    {% set s = item.shift %}
+    {% set su = item.my_signup %}
+    <div class="vol-today-card">
+      <div class="vol-today-label">Your shift today</div>
+      <div class="vol-today-title">{{ s.shift_type }} &middot; {{ s.campus.split(' College')[0] }}</div>
+      <div class="vol-today-time">{{ s.start_time.strftime('%-I:%M %p') }} &ndash; {{ s.end_time.strftime('%-I:%M %p') }}</div>
+      {% if item.filled > 1 %}
+      <div class="vol-today-team">{{ item.filled }} volunteers coming with you</div>
+      {% endif %}
+      {% if s.notes %}
+      <div class="vol-today-notes">&#128204; {{ s.notes }}</div>
+      {% endif %}
+      {% if su.status == 'checked_in' %}
+      <div class="vol-today-checked">&#10003; You're checked in</div>
+      {% else %}
+      <button class="vol-today-btn" onclick="checkIn({{ s.id }})">I'm Here &mdash; Check In</button>
+      {% endif %}
+      <a href="{{ url_for('volunteer.shift_detail', shift_id=s.id) }}" class="vol-today-detail">View shift details</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Tomorrow reminder -->
+  {% if tomorrow_items %}
+  {% for item in tomorrow_items %}
+  {% set s = item.shift %}
+  <div class="vol-reminder-card">
+    <div class="vol-reminder-icon">&#128337;</div>
+    <div>
+      <div class="vol-reminder-title">Tomorrow: {{ s.shift_type }} at {{ s.campus.split(' College')[0] }}</div>
+      <div class="vol-reminder-time">{{ s.start_time.strftime('%-I:%M %p') }} &ndash; {{ s.end_time.strftime('%-I:%M %p') }}{% if item.filled > 1 %} &nbsp;&middot;&nbsp; {{ item.filled }} others signed up{% endif %}</div>
+    </div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- Urgent shifts -->
+  {% if urgent_items %}
+  <div class="vol-urgent-section">
+    <h3 class="vol-urgent-title">Shifts that need you</h3>
+    {% for item in urgent_items %}
+    {% set s = item.shift %}
+    <a href="{{ url_for('volunteer.shift_detail', shift_id=s.id) }}" class="vol-urgent-card">
+      <div>
+        <div class="vol-urgent-name">{{ s.shift_type }} &middot; {{ s.campus.split(' College')[0] }}</div>
+        <div class="vol-urgent-date">{{ s.date.strftime('%a, %b %-d') }} &middot; {{ s.start_time.strftime('%-I:%M %p') }}</div>
+      </div>
+      <span class="vol-urgent-spots">{{ item.spots_left }} spot{{ 's' if item.spots_left != 1 }} left</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if prefs_stale %}
+  <div class="vol-banner" id="prefsBanner">
+    <div class="vol-banner-content">
+      <span>It's been a while — <a href="{{ url_for('volunteer.profile') }}">review your campus and shift preferences</a></span>
+    </div>
+    <button class="vol-banner-close" onclick="dismissBanner()" aria-label="Dismiss">&times;</button>
+  </div>
+  {% endif %}
+
+  <!-- Campus filter pills -->
+  <div class="vol-pills">
+    <a href="{{ url_for('volunteer.shifts_browse', campus='all') }}" class="vol-pill {{ 'active' if campus_filter == 'all' }}">All</a>
+    {% for c in campuses %}
+    <a href="{{ url_for('volunteer.shifts_browse', campus=c) }}" class="vol-pill {{ 'active' if campus_filter == c }}">{{ c.split(' ')[0] }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- Shift cards -->
+  {% if shift_data %}
+  <div class="vol-shift-list">
+    {% for item in shift_data %}
+    {% set s = item.shift %}
+    {% set campus_cls = 'de-anza' if 'De Anza' in s.campus else ('foothill' if 'Foothill' in s.campus else 'chabot') %}
+    <a href="{{ url_for('volunteer.shift_detail', shift_id=s.id) }}" class="vol-shift-card campus-{{ campus_cls }}">
+      <div class="vol-shift-card-top">
+        <span class="vol-shift-campus">{{ s.campus }}</span>
+        <span class="vol-shift-type">{{ s.shift_type }}</span>
+      </div>
+      <div class="vol-shift-card-date">
+        {% if item.is_today %}
+        <span class="vol-badge vol-badge-green">Today</span>
+        {% endif %}
+        {{ s.date.strftime('%a, %b %-d') }}
+      </div>
+      <div class="vol-shift-card-time">{{ s.start_time.strftime('%-I:%M %p') }} &ndash; {{ s.end_time.strftime('%-I:%M %p') }}</div>
+      <div class="vol-shift-card-bottom">
+        <div class="vol-fill-bar">
+          <div class="vol-fill-bar-inner {% if item.spots_left == 0 %}full{% elif item.filled >= s.required_count // 2 %}partial{% else %}critical{% endif %}" style="width: {{ (item.filled / s.required_count * 100) | int if s.required_count > 0 else 100 }}%"></div>
+        </div>
+        <span class="vol-spots-text">{{ item.spots_left }} spot{{ 's' if item.spots_left != 1 }} left</span>
+        {% if item.my_signup %}
+        <span class="vol-badge vol-badge-{{ 'green' if item.my_signup.status == 'checked_in' else 'amber' }}">
+          {{ 'Checked In' if item.my_signup.status == 'checked_in' else 'Signed Up' }}
+        </span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="vol-empty">
+    <p>No upcoming shifts{{ ' at ' + campus_filter if campus_filter != 'all' else '' }}.</p>
+    {% if campus_filter != 'all' %}
+    <a href="{{ url_for('volunteer.shifts_browse', campus='all') }}" class="vol-btn vol-btn-secondary">View all campuses</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

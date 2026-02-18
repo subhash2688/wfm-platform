@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+{% block title %}Actions — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Actions</div>
+  <h1>What To Do Next</h1>
+  <p class="page-subtitle">Grants to apply for, people to reach out to, emails to send, events to attend.</p>
+</div>
+
+<!-- Sub-tabs -->
+<div class="sub-tabs">
+  <button class="sub-tab active" onclick="switchTab('thisweek')">This Week ({{ action_stats.todo }})</button>
+  <button class="sub-tab" onclick="switchTab('grants')">Grants ({{ grants|length }})</button>
+  <button class="sub-tab" onclick="switchTab('people')">People ({{ contacts|length }})</button>
+  <button class="sub-tab" onclick="switchTab('outreach')">Outreach ({{ emails|length }})</button>
+  <button class="sub-tab" onclick="switchTab('events')">Events ({{ events|length }})</button>
+</div>
+
+<!-- ═══ TAB: This Week ═══ -->
+<div class="tab-panel active" id="panel-thisweek">
+  <div class="flex-between mb-16">
+    <div class="flex gap-8">
+      <span style="font-size: 14px; color: var(--text-dim);">{{ action_stats.done }} of {{ action_stats.total }} done</span>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-sm btn-secondary" onclick="seedActions()">Seed from Data</button>
+      <button class="btn btn-sm btn-primary" onclick="showAddAction()">+ Add Action</button>
+    </div>
+  </div>
+
+  <!-- Add action form (hidden) -->
+  <div id="addActionForm" class="card mb-16" style="display: none;">
+    <div class="flex gap-12" style="flex-wrap: wrap;">
+      <div class="form-group" style="flex: 2; min-width: 200px; margin-bottom: 0;">
+        <label>Description</label>
+        <input type="text" id="newActionDesc" placeholder="What needs to be done?">
+      </div>
+      <div class="form-group" style="flex: 0.5; min-width: 100px; margin-bottom: 0;">
+        <label>Type</label>
+        <select id="newActionType">
+          <option value="email">Email</option>
+          <option value="call">Call</option>
+          <option value="apply">Apply</option>
+          <option value="research" selected>Research</option>
+          <option value="attend">Attend</option>
+          <option value="connect">Connect</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex: 0.5; min-width: 100px; margin-bottom: 0;">
+        <label>Priority</label>
+        <select id="newActionPriority">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex: 0.5; min-width: 120px; margin-bottom: 0;">
+        <label>Due Date</label>
+        <input type="date" id="newActionDue">
+      </div>
+      <div style="display: flex; align-items: flex-end; gap: 8px;">
+        <button class="btn btn-sm btn-primary" onclick="addAction()">Add</button>
+        <button class="btn btn-sm btn-ghost" onclick="hideAddAction()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action items list -->
+  {% for a in actions %}
+  <div class="action-item {% if a.status == 'done' %}done{% endif %}" id="action-{{ a.id }}">
+    <input type="checkbox" class="action-check" {% if a.status == 'done' %}checked{% endif %}
+           onchange="toggleAction({{ a.id }}, this.checked)">
+    <div style="flex: 1;">
+      <div class="action-desc">{{ a.description }}</div>
+      <div class="flex gap-8" style="margin-top: 2px;">
+        {% if a._company %}
+        <span class="action-company">{{ a._company }}</span>
+        {% endif %}
+        <span class="badge {% if a.action_type == 'email' %}badge-blue{% elif a.action_type == 'apply' %}badge-green{% elif a.action_type == 'call' %}badge-orange{% else %}badge-purple{% endif %}" style="font-size: 10px;">{{ a.action_type }}</span>
+        <span class="badge {% if a.priority == 'high' %}badge-rose{% elif a.priority == 'medium' %}badge-orange{% else %}badge-green{% endif %}" style="font-size: 10px;">{{ a.priority }}</span>
+      </div>
+    </div>
+    {% if a.due_date %}
+    <div class="action-due {% if a.due_date < today and a.status != 'done' %}overdue{% endif %}">
+      {{ a.due_date.strftime('%b %d') }}
+    </div>
+    {% endif %}
+    <button class="btn-icon" onclick="deleteAction({{ a.id }})" title="Delete">&#10005;</button>
+  </div>
+  {% endfor %}
+
+  {% if not actions %}
+  <div class="empty-state">
+    <div class="empty-icon">&#9745;</div>
+    <h3>No action items yet</h3>
+    <p>Click "Seed from Data" to auto-create tasks from your prospects, grants, and emails, or add them manually.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ TAB: Grants ═══ -->
+<div class="tab-panel" id="panel-grants">
+  <div class="flex-between mb-16">
+    <span style="font-size: 14px; color: var(--text-dim);">{{ grants|length }} grant opportunities tracked</span>
+    <button class="btn btn-sm btn-primary" onclick="toggleGrantForm()">+ Add Grant</button>
+  </div>
+
+  <!-- Add grant form (hidden) -->
+  <div id="addGrantForm" class="card mb-16" style="display: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div class="form-group"><label>Company</label><input type="text" id="grantCompany"></div>
+      <div class="form-group"><label>Program Name</label><input type="text" id="grantProgram"></div>
+      <div class="form-group"><label>Focus Area</label><input type="text" id="grantFocus"></div>
+      <div class="form-group"><label>Deadline</label><input type="text" id="grantDeadline" placeholder="e.g. March 2026"></div>
+      <div class="form-group"><label>Award Range</label><input type="text" id="grantAward" placeholder="e.g. $5K–$25K"></div>
+      <div class="form-group"><label>Application URL</label><input type="url" id="grantUrl"></div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="grantPriority">
+          <option value="High">High</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Grant Type</label>
+        <select id="grantType">
+          <option value="Cash">Cash</option>
+          <option value="In-Kind">In-Kind</option>
+          <option value="Product">Product</option>
+          <option value="Ad Credits">Ad Credits</option>
+          <option value="Employee Matching">Employee Matching</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+      <button class="btn btn-sm btn-primary" onclick="addGrant()">Add Grant</button>
+      <button class="btn btn-sm btn-ghost" onclick="toggleGrantForm()">Cancel</button>
+    </div>
+  </div>
+
+  {% for label, group in [('High Priority', high_grants), ('Medium Priority', med_grants), ('Low Priority', low_grants)] %}
+  {% if group %}
+  <h3 class="section-header">{{ label }} ({{ group|length }})</h3>
+  {% for d in group %}
+  {% include "components/grant_card.html" with context %}
+  {% endfor %}
+  {% endif %}
+  {% endfor %}
+
+  {% if not grants %}
+  <div class="empty-state">
+    <div class="empty-icon">&#127942;</div>
+    <h3>No grant opportunities yet</h3>
+    <p>Add grant opportunities to track deadlines and application progress.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ TAB: People ═══ -->
+<div class="tab-panel" id="panel-people">
+  <div class="flex-between mb-16">
+    <span style="font-size: 14px; color: var(--text-dim);">{{ contacts|length }} contacts across your pipeline</span>
+    <button class="btn btn-sm btn-primary" onclick="toggleContactForm()">+ Add Contact</button>
+  </div>
+
+  <!-- Add contact form (hidden) -->
+  <div id="addContactForm" class="card mb-16" style="display: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div class="form-group"><label>Name</label><input type="text" id="contactName"></div>
+      <div class="form-group"><label>Title</label><input type="text" id="contactTitle"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="contactEmail"></div>
+      <div class="form-group"><label>LinkedIn URL</label><input type="url" id="contactLinkedin"></div>
+      <div class="form-group">
+        <label>Company</label>
+        <select id="contactProspect">
+          <option value="">Select a company...</option>
+          {% for p in prospects %}
+          <option value="{{ p.id }}">{{ p.company_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label>Source</label><input type="text" id="contactSource" placeholder="e.g. LinkedIn, website"></div>
+    </div>
+    <div class="flex gap-8 mt-16">
+      <button class="btn btn-sm btn-primary" onclick="addContact()">Add Contact</button>
+      <button class="btn btn-sm btn-ghost" onclick="toggleContactForm()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for c in contacts %}
+    <div class="contact-card">
+      <h4>{{ c.name or 'Unknown' }}</h4>
+      <div class="contact-title">{{ c.title or 'No title' }}</div>
+      <div class="contact-company">{{ c._company }}</div>
+      <div class="contact-links">
+        {% if c.email %}
+        <a href="mailto:{{ c.email }}">{{ c.email }}</a>
+        {% endif %}
+        {% if c.linkedin_url %}
+        <a href="{{ c.linkedin_url }}" target="_blank">LinkedIn</a>
+        {% endif %}
+      </div>
+      {% if c.is_primary %}
+      <span class="badge badge-green" style="margin-top: 8px; font-size: 10px;">Primary</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if not contacts %}
+  <div class="empty-state">
+    <div class="empty-icon">&#128100;</div>
+    <h3>No contacts yet</h3>
+    <p>Add contacts for your prospect companies to track who to reach out to.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ TAB: Outreach ═══ -->
+<div class="tab-panel" id="panel-outreach">
+  <div class="flex-between mb-16">
+    <span style="font-size: 14px; color: var(--text-dim);">{{ emails|length }} outreach emails</span>
+    <button class="btn btn-sm btn-primary" onclick="generateTopEmails()">Generate for Top 15</button>
+  </div>
+
+  {% for e in emails %}
+  <div class="email-card">
+    <div class="email-header">
+      <div>
+        <a href="/company/{{ e.prospect_id }}" class="email-subject">{{ e.company_name }}</a>
+        <span class="word-count {% if e.word_count <= 150 %}ok{% elif e.word_count <= 180 %}warning{% else %}over{% endif %}">
+          {{ e.word_count }} words
+        </span>
+      </div>
+      <span class="badge {% if e.status == 'sent' %}badge-green{% elif e.status == 'reviewed' %}badge-blue{% else %}badge-orange{% endif %}">{{ e.status }}</span>
+    </div>
+    <div class="email-meta">Subject: {{ e.subject }}</div>
+    <div class="email-body">{{ e.body }}</div>
+    {% if e.personalization_notes %}
+    <div class="email-notes">{{ e.personalization_notes }}</div>
+    {% endif %}
+    <div class="email-actions">
+      <button class="btn btn-sm btn-ghost" onclick="copyEmailText({{ e.id }})">Copy</button>
+      <button class="btn btn-sm btn-ghost" onclick="editEmail({{ e.id }})">Edit</button>
+      {% if e.status == 'draft' %}
+      <button class="btn btn-sm btn-ghost" onclick="markStatus({{ e.id }}, 'reviewed')">Mark Reviewed</button>
+      {% elif e.status == 'reviewed' %}
+      <button class="btn btn-sm btn-primary" onclick="markStatus({{ e.id }}, 'sent')">Mark Sent</button>
+      {% endif %}
+      <button class="btn btn-sm btn-ghost" onclick="regenerateEmail({{ e.prospect_id }})">Regenerate</button>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if not emails %}
+  <div class="empty-state">
+    <div class="empty-icon">&#9993;</div>
+    <h3>No outreach emails yet</h3>
+    <p>Click "Generate for Top 15" to create personalized outreach emails for your highest-scored prospects.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══ TAB: Events ═══ -->
+<div class="tab-panel" id="panel-events">
+  <div class="flex-between mb-16">
+    <span style="font-size: 14px; color: var(--text-dim);">{{ events|length }} events tracked</span>
+    <button class="btn btn-sm btn-primary" onclick="toggleEventForm()">+ Add Event</button>
+  </div>
+
+  <!-- Add event form (hidden) -->
+  <div id="addEventForm" class="card mb-16" style="display: none;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div class="form-group"><label>Event Name</label><input type="text" id="eventName"></div>
+      <div class="form-group">
+        <label>Type</label>
+        <select id="eventType">
+          <option value="conference">Conference</option>
+          <option value="webinar">Webinar</option>
+          <option value="info_session">Info Session</option>
+          <option value="networking" selected>Networking</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Date</label><input type="date" id="eventDate"></div>
+      <div class="form-group"><label>Location</label><input type="text" id="eventLocation"></div>
+      <div class="form-group"><label>URL</label><input type="url" id="eventUrl"></div>
+      <div class="form-group"><label>Relevance</label><input type="text" id="eventRelevance" placeholder="Why attend?"></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea id="eventDesc" rows="2"></textarea></div>
+    <div class="flex gap-8 mt-16">
+      <button class="btn btn-sm btn-primary" onclick="addEvent()">Add Event</button>
+      <button class="btn btn-sm btn-ghost" onclick="toggleEventForm()">Cancel</button>
+    </div>
+  </div>
+
+  {% for ev in events %}
+  <div class="event-card mb-8">
+    {% if ev.date %}
+    <div class="event-date-box">
+      <div class="month">{{ ev.date.strftime('%b') }}</div>
+      <div class="day">{{ ev.date.strftime('%d') }}</div>
+    </div>
+    {% endif %}
+    <div class="event-info" style="flex: 1;">
+      <h4>{{ ev.name }}</h4>
+      <p>
+        <span class="badge {% if ev.event_type == 'conference' %}badge-purple{% elif ev.event_type == 'webinar' %}badge-blue{% else %}badge-green{% endif %}" style="font-size: 10px;">{{ ev.event_type }}</span>
+        {% if ev.location %}&middot; {{ ev.location }}{% endif %}
+        <span class="badge {% if ev.status == 'attended' %}badge-green{% elif ev.status == 'registered' %}badge-blue{% else %}badge-orange{% endif %}" style="font-size: 10px;">{{ ev.status }}</span>
+      </p>
+      {% if ev.description %}
+      <p style="margin-top: 4px;">{{ ev.description }}</p>
+      {% endif %}
+      {% if ev.relevance %}
+      <p style="margin-top: 4px; color: var(--green);"><strong>Why:</strong> {{ ev.relevance }}</p>
+      {% endif %}
+    </div>
+    <div class="flex gap-4">
+      {% if ev.url %}
+      <a href="{{ ev.url }}" target="_blank" class="btn btn-sm btn-ghost">Visit</a>
+      {% endif %}
+      {% if ev.status == 'upcoming' %}
+      <button class="btn btn-sm btn-ghost" onclick="updateEvent({{ ev.id }}, 'registered')">Register</button>
+      {% elif ev.status == 'registered' %}
+      <button class="btn btn-sm btn-ghost" onclick="updateEvent({{ ev.id }}, 'attended')">Attended</button>
+      {% endif %}
+      <button class="btn-icon" onclick="deleteEvent({{ ev.id }})" title="Delete">&#10005;</button>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if not events %}
+  <div class="empty-state">
+    <div class="empty-icon">&#128197;</div>
+    <h3>No events yet</h3>
+    <p>Add conferences, webinars, and networking events relevant to your fundraising pipeline.</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/actions.js') }}"></script>
+{% endblock %}

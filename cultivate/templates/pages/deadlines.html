@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Grant Opportunities — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Manage</div>
+  <h1>Grant Opportunities & Deadlines</h1>
+  <p class="page-subtitle">Track grant programs, application requirements, deadlines, and what you need to apply. Sorted by priority for WFM.</p>
+</div>
+
+<!-- Summary stats -->
+<div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 32px;">
+  <div class="stat-card">
+    <div class="stat-value">{{ deadlines|length }}</div>
+    <div class="stat-label">Total Opportunities</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ high_priority|length }}</div>
+    <div class="stat-label">High Priority</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-value">{{ type_counts.get('Cash', 0) }}</div>
+    <div class="stat-label">Cash Grants</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">{{ type_counts.get('In-Kind (Ad Credits)', 0) + type_counts.get('In-Kind (Software)', 0) + type_counts.get('Employee Match', 0) }}</div>
+    <div class="stat-label">In-Kind / Match</div>
+  </div>
+</div>
+
+<div class="flex-between mb-24">
+  <button class="btn btn-primary btn-sm" onclick="showAddDeadline()">Add Grant Opportunity</button>
+</div>
+
+<!-- Add form (hidden) -->
+<div id="addDeadlineForm" class="card mb-24" style="display: none; cursor: default;">
+  <h3 style="margin-bottom: 16px;">Add Grant Opportunity</h3>
+  <form onsubmit="addDeadline(event)">
+    <div class="two-col" style="gap: 16px;">
+      <div class="form-group">
+        <label>Company / Foundation</label>
+        <input type="text" name="company_name" required>
+      </div>
+      <div class="form-group">
+        <label>Program Name</label>
+        <input type="text" name="program_name" required>
+      </div>
+      <div class="form-group">
+        <label>Focus Area</label>
+        <input type="text" name="focus_area">
+      </div>
+      <div class="form-group">
+        <label>Deadline</label>
+        <input type="text" name="deadline" placeholder="e.g. 2026-06-15 or Rolling">
+      </div>
+      <div class="form-group">
+        <label>Award Range</label>
+        <input type="text" name="award_range" placeholder="e.g. $5,000 - $25,000">
+      </div>
+      <div class="form-group">
+        <label>Grant Type</label>
+        <select name="grant_type">
+          <option value="Cash">Cash</option>
+          <option value="In-Kind (Software)">In-Kind (Software)</option>
+          <option value="In-Kind (Ad Credits)">In-Kind (Ad Credits)</option>
+          <option value="Employee Match">Employee Match</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Application URL</label>
+        <input type="url" name="application_url">
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select name="priority">
+          <option value="High">High</option>
+          <option value="Medium" selected>Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+      <button type="submit" class="btn btn-primary btn-sm">Save</button>
+      <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('addDeadlineForm').style.display='none'">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- HIGH PRIORITY -->
+{% if high_priority %}
+<div class="section-header" style="color: var(--green);">High Priority — Act Now</div>
+{% for d in high_priority %}
+{% include "components/grant_card.html" %}
+{% endfor %}
+{% endif %}
+
+<!-- MEDIUM PRIORITY -->
+{% if medium_priority %}
+<div class="section-header mt-24">Medium Priority — Build Relationships</div>
+{% for d in medium_priority %}
+{% include "components/grant_card.html" %}
+{% endfor %}
+{% endif %}
+
+<!-- LOW PRIORITY -->
+{% if low_priority %}
+<div class="section-header mt-24" style="color: var(--text-muted);">Lower Priority — In-Kind & Product</div>
+{% for d in low_priority %}
+{% include "components/grant_card.html" %}
+{% endfor %}
+{% endif %}
+
+{% if not deadlines %}
+<div class="empty-state">
+  <div class="empty-icon">&#128197;</div>
+  <h3>No grant opportunities tracked yet</h3>
+  <p>Add grant programs and deadlines to track application windows and requirements.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAddDeadline() {
+  document.getElementById('addDeadlineForm').style.display = 'block';
+}
+
+function toggleGrantDetail(id) {
+  var detail = document.getElementById('grantDetail-' + id);
+  var btn = document.getElementById('grantToggle-' + id);
+  if (detail.style.display === 'none') {
+    detail.style.display = 'block';
+    btn.textContent = 'Hide Application Details';
+  } else {
+    detail.style.display = 'none';
+    btn.textContent = 'Show Application Details';
+  }
+}
+
+function addDeadline(e) {
+  e.preventDefault();
+  var form = e.target;
+  var data = Object.fromEntries(new FormData(form));
+  fetch('/api/deadline', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() { showToast('Grant opportunity added!', 'success'); setTimeout(function() { location.reload(); }, 800); })
+  .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
+function updateDeadlineStatus(id, status) {
+  fetch('/api/deadline/' + id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: status })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() { showToast('Status updated', 'success'); })
+  .catch(function() { showToast('Error', 'error'); });
+}
+
+function deleteDeadline(id) {
+  if (!confirm('Delete this grant opportunity?')) return;
+  fetch('/api/deadline/' + id, { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function() { showToast('Deleted', 'success'); setTimeout(function() { location.reload(); }, 500); })
+    .catch(function() { showToast('Error', 'error'); });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "base_mobile.html" %}
+
+{% block content %}
+<div class="vol-page">
+  <h2 class="vol-page-title">My Shifts</h2>
+
+  <!-- Post-shift acknowledgment -->
+  {% if recent_completion %}
+  {% set s = recent_completion.shift %}
+  <div class="vol-ack-card">
+    <div class="vol-ack-icon">&#127807;</div>
+    <div>
+      <div class="vol-ack-title">You showed up. Thank you.</div>
+      <div class="vol-ack-detail">{{ s.shift_type }} at {{ s.campus.split(' College')[0] }} &middot; {{ s.date.strftime('%b %-d') }}</div>
+      <div class="vol-ack-impact">{{ recent_completion.vol_count }} volunteers, including you, helped serve an estimated {{ recent_completion.meals }} students that day.</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Stats bar -->
+  <div class="vol-stats-bar vol-stats-3col">
+    <div class="vol-stat">
+      <span class="vol-stat-value">{{ stats.total_shifts }}</span>
+      <span class="vol-stat-label">Shifts</span>
+    </div>
+    <div class="vol-stat">
+      <span class="vol-stat-value">{{ stats.total_hours }}</span>
+      <span class="vol-stat-label">Hours</span>
+    </div>
+    <div class="vol-stat">
+      <span class="vol-stat-value">{{ streak }}</span>
+      <span class="vol-stat-label">Week Streak</span>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  {% if badges %}
+  <div class="vol-badges-row">
+    {% for b in badges %}
+    <span class="vol-badge-icon" title="{{ b.name }}">{{ b.icon }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Upcoming -->
+  <h3 class="vol-section-title">Upcoming</h3>
+  {% if upcoming %}
+  <div class="vol-shift-list">
+    {% for item in upcoming %}
+    {% set s = item.shift %}
+    {% set su = item.signup %}
+    {% set campus_cls = 'de-anza' if 'De Anza' in s.campus else ('foothill' if 'Foothill' in s.campus else 'chabot') %}
+    <a href="{{ url_for('volunteer.shift_detail', shift_id=s.id) }}" class="vol-shift-card campus-{{ campus_cls }}">
+      <div class="vol-shift-card-top">
+        <span class="vol-shift-campus">{{ s.campus }}</span>
+        <span class="vol-badge vol-badge-{{ 'green' if su.status == 'checked_in' else ('amber' if su.status in ['signed_up', 'confirmed'] else 'gray') }}">
+          {{ su.status | replace('_', ' ') | title }}
+        </span>
+      </div>
+      <div class="vol-shift-card-date">{{ s.date.strftime('%a, %b %-d') }}</div>
+      <div class="vol-shift-card-time">{{ s.start_time.strftime('%-I:%M %p') }} &ndash; {{ s.end_time.strftime('%-I:%M %p') }}</div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="vol-empty">
+    <p>No upcoming shifts. <a href="{{ url_for('volunteer.shifts_browse') }}">Browse shifts</a></p>
+  </div>
+  {% endif %}
+
+  <!-- Past -->
+  <h3 class="vol-section-title">Past</h3>
+  {% if past %}
+  <div class="vol-shift-list">
+    {% for item in past %}
+    {% set s = item.shift %}
+    {% set su = item.signup %}
+    {% set campus_cls = 'de-anza' if 'De Anza' in s.campus else ('foothill' if 'Foothill' in s.campus else 'chabot') %}
+    <div class="vol-shift-row campus-{{ campus_cls }}">
+      <div>
+        <div class="vol-shift-row-campus">{{ s.campus }}</div>
+        <div class="vol-shift-row-date">{{ s.date.strftime('%b %-d') }} &middot; {{ s.shift_type }}</div>
+      </div>
+      <span class="vol-badge vol-badge-{{ 'green' if su.status == 'completed' else ('red' if su.status == 'no_show' else 'gray') }}">
+        {{ su.status | replace('_', ' ') | title }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="vol-empty"><p>No past shifts yet.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

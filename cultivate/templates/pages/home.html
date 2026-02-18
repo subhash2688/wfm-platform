@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Cultivate — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="home-hero">
+  <h1 class="home-heading">
+    Find the corporates.<br>
+    Build the case.<br>
+    <em>Fund the meals.</em>
+  </h1>
+  <p class="home-subtitle">
+    Your workspace for turning corporate generosity into student meals — from prospect research to funded partnership.
+  </p>
+
+  <!-- Stats row -->
+  <div class="home-stats">
+    <div class="home-stat">
+      <div class="home-stat-num blue">{{ total_prospects }}</div>
+      <div class="home-stat-label">Prospects</div>
+    </div>
+    <div class="home-stat">
+      <div class="home-stat-num orange">{{ foundations_count }}</div>
+      <div class="home-stat-label">Foundations analyzed</div>
+    </div>
+    <div class="home-stat">
+      <div class="home-stat-num purple">{{ emails_count }}</div>
+      <div class="home-stat-label">Emails drafted</div>
+    </div>
+    <div class="home-stat">
+      <div class="home-stat-num rose">{{ outreach_active }}</div>
+      <div class="home-stat-label">In outreach</div>
+    </div>
+    <div class="home-stat">
+      <div class="home-stat-num muted">${{ '{:,.0f}'.format(total_raised) }}</div>
+      <div class="home-stat-label">Raised (so far)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Campuses -->
+<div class="home-campuses">
+  <div class="home-campuses-inner">
+    <span class="home-campuses-label">Serving</span>
+    <span class="home-campuses-divider"></span>
+    <div class="home-campus-items">
+      <div class="home-campus">
+        <div class="home-campus-marker blue-bg">&#127979;</div>
+        <div>
+          <div class="home-campus-name">De Anza College</div>
+          <div class="home-campus-meta">Cupertino &middot; <span class="blue-text">{{ campus_counts['De Anza College'] }} nearby</span></div>
+        </div>
+      </div>
+      <div class="home-campus">
+        <div class="home-campus-marker orange-bg">&#127979;</div>
+        <div>
+          <div class="home-campus-name">Foothill College</div>
+          <div class="home-campus-meta">Los Altos Hills &middot; <span class="orange-text">{{ campus_counts['Foothill College'] }} nearby</span></div>
+        </div>
+      </div>
+      <div class="home-campus">
+        <div class="home-campus-marker purple-bg">&#127979;</div>
+        <div>
+          <div class="home-campus-name">Chabot College</div>
+          <div class="home-campus-meta">Hayward &middot; <span class="purple-text">{{ campus_counts['Chabot College'] }} nearby</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Workspace -->
+<div class="home-workspace">
+  <div class="home-ws-label">Your workspace</div>
+  <div class="home-ws-grid">
+
+    <a href="/intelligence" class="home-ws-card">
+      <div class="home-ws-head">
+        <div class="home-ws-icon blue-bg">&#128270;</div>
+        <div class="home-ws-stat">
+          <div class="home-ws-num blue">{{ foundations_count }}</div>
+          <div class="home-ws-sub">Analyzed</div>
+        </div>
+      </div>
+      <div class="home-ws-body">
+        <h3>Research</h3>
+        <p>Explore corporate foundations, pull 990 data, and understand what each company actually funds before you reach out.</p>
+      </div>
+      <div class="home-ws-chips">
+        <span class="home-ws-chip">Analyze a foundation</span>
+        <span class="home-ws-chip">Search 990 data</span>
+        <span class="home-ws-chip">Auto-research batch</span>
+      </div>
+    </a>
+
+    <a href="/actions" class="home-ws-card">
+      <div class="home-ws-head">
+        <div class="home-ws-icon orange-bg">&#9993;</div>
+        <div class="home-ws-stat">
+          <div class="home-ws-num orange">{{ actions_todo }}</div>
+          <div class="home-ws-sub">Pending</div>
+        </div>
+      </div>
+      <div class="home-ws-body">
+        <h3>Outreach</h3>
+        <p>Draft personalized emails, track contacts, manage follow-ups, and apply for open grant opportunities.</p>
+      </div>
+      <div class="home-ws-chips">
+        <span class="home-ws-chip">Draft an email</span>
+        <span class="home-ws-chip">Grant deadlines</span>
+        <span class="home-ws-chip">Follow-up queue</span>
+      </div>
+    </a>
+
+    <a href="/pipeline" class="home-ws-card">
+      <div class="home-ws-head">
+        <div class="home-ws-icon purple-bg">&#128202;</div>
+        <div class="home-ws-stat">
+          <div class="home-ws-num purple">{{ total_prospects }}</div>
+          <div class="home-ws-sub">Tracked</div>
+        </div>
+      </div>
+      <div class="home-ws-body">
+        <h3>Pipeline</h3>
+        <p>Every prospect at a glance — scores, stages, and what needs to happen next to move them forward.</p>
+      </div>
+      <div class="home-ws-chips">
+        <span class="home-ws-chip">View all prospects</span>
+        <span class="home-ws-chip">Top 15 priority</span>
+        <span class="home-ws-chip">Export tracker</span>
+      </div>
+    </a>
+
+    <a href="/progress" class="home-ws-card">
+      <div class="home-ws-head">
+        <div class="home-ws-icon rose-bg">&#127919;</div>
+        <div class="home-ws-stat">
+          <div class="home-ws-num rose">Wk 1</div>
+          <div class="home-ws-sub">of 12</div>
+        </div>
+      </div>
+      <div class="home-ws-body">
+        <h3>Progress</h3>
+        <p>Track your 90-day launch plan, weekly goals, and watch the pipeline convert into real partnerships.</p>
+      </div>
+      <div class="home-ws-chips">
+        <span class="home-ws-chip">90-day plan</span>
+        <span class="home-ws-chip">Weekly scorecard</span>
+        <span class="home-ws-chip">Conversion metrics</span>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- Recent Activity -->
+{% if activities %}
+<div class="home-activity">
+  <div class="home-act-head">
+    <h3>Recent activity</h3>
+    <a href="/progress">View all &rarr;</a>
+  </div>
+  <div class="home-act-list">
+    {% for a in activities %}
+    <div class="home-act-item">
+      <div class="home-act-marker">&#128196;</div>
+      <div class="home-act-content">
+        <div class="home-act-title">{{ a.description }}</div>
+        <div class="home-act-time">{{ a.timestamp.strftime('%b %d, %H:%M') if a.timestamp else '' }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Footer -->
+<div class="home-footer">
+  <p><strong>Cultivate</strong> by World Food Movement &middot; Built to fund the meals that keep students in school</p>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rally — Join</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+</head>
+<body class="vol-auth-page">
+  <div class="vol-auth-container">
+    <div class="vol-auth-brand">
+      <img src="{{ url_for('static', filename='img/wfm-logo-white.png') }}" alt="WFM" class="vol-auth-logo">
+      <h1 class="vol-auth-title">Rally</h1>
+      <p class="vol-auth-subtitle">Welcome! Tell us about yourself</p>
+    </div>
+
+    <div class="vol-auth-card">
+      {% if error %}
+      <div class="vol-alert vol-alert-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('volunteer.register_post') }}">
+        <label class="vol-label" for="first_name">First name</label>
+        <input type="text" id="first_name" name="first_name" class="vol-input" placeholder="First name" required autofocus>
+
+        <label class="vol-label" for="last_name">Last name</label>
+        <input type="text" id="last_name" name="last_name" class="vol-input" placeholder="Last name" required>
+
+        <label class="vol-label">Which campuses can you volunteer at?</label>
+        <div class="vol-checkbox-group">
+          {% for campus in campuses %}
+          <label class="vol-checkbox-label">
+            <input type="checkbox" name="campuses" value="{{ campus }}">
+            <span>{{ campus }}</span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <label class="vol-label">What types of volunteering service interest you?</label>
+        <div class="vol-checkbox-group">
+          {% for st in shift_types %}
+          <label class="vol-checkbox-label">
+            <input type="checkbox" name="shift_types" value="{{ st }}">
+            <span>{{ st }}</span>
+          </label>
+          {% endfor %}
+        </div>
+
+        <label class="vol-label">Are you a youth volunteer (under 18)?</label>
+        <div class="vol-checkbox-group">
+          <label class="vol-checkbox-label">
+            <input type="checkbox" name="is_youth" value="yes">
+            <span>Yes, I am a youth volunteer</span>
+          </label>
+        </div>
+
+        <button type="submit" class="vol-btn vol-btn-primary">Join Rally</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

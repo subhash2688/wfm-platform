@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}{{ volunteer.full_name }} — Rally{% endblock %}
+
+{% block content %}
+<div class="detail-header">
+  <div class="detail-info">
+    <div class="page-tag">Volunteer Profile</div>
+    <h1>{{ volunteer.full_name }}</h1>
+    <div class="detail-meta">
+      <span>&#128222; {{ volunteer.phone }}
+        {% if wa_url %}
+        <a href="{{ wa_url }}" target="_blank" rel="noopener" class="btn-wa-inline" title="Open WhatsApp">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+        {% endif %}
+      </span>
+      {% if volunteer.email %}
+      <span>&#9993; {{ volunteer.email }}</span>
+      {% endif %}
+      <span class="badge badge-{{ 'green' if volunteer.status == 'active' else ('blue' if volunteer.status == 'new' else 'rose') }}">
+        {{ volunteer.status }}
+      </span>
+      {% if volunteer.is_youth %}
+      <span class="badge badge-orange">Youth</span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="flex gap-8">
+    <a href="/volunteers" class="btn btn-sm btn-ghost">&larr; All Volunteers</a>
+    {% if volunteer.status != 'active' %}
+    <button class="btn btn-sm btn-primary" onclick="updateStatus('active')">Activate</button>
+    {% endif %}
+    {% if volunteer.status == 'active' %}
+    <button class="btn btn-sm btn-ghost" onclick="updateStatus('inactive')">Deactivate</button>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="vol-stat-row">
+  <div class="vol-stat">
+    <div class="vol-stat-num" style="color: var(--primary);">{{ stats.total_shifts }}</div>
+    <div class="vol-stat-label">Shifts Completed</div>
+  </div>
+  <div class="vol-stat">
+    <div class="vol-stat-num" style="color: var(--orange);">{{ stats.total_hours }}h</div>
+    <div class="vol-stat-label">Total Hours</div>
+  </div>
+  <div class="vol-stat">
+    <div class="vol-stat-num" style="color: {{ 'var(--green)' if stats.reliability_pct >= 90 else ('var(--orange)' if stats.reliability_pct >= 70 else 'var(--rose)') }};">{{ stats.reliability_pct }}%</div>
+    <div class="vol-stat-label">Reliability</div>
+  </div>
+  <div class="vol-stat">
+    <div class="vol-stat-num" style="color: var(--purple);">{{ stats.last_active or 'N/A' }}</div>
+    <div class="vol-stat-label">Last Shift</div>
+  </div>
+  <div class="vol-stat">
+    {% if last_seen_display %}
+    {% set health_color = 'var(--green)' if (last_seen_days is not none and last_seen_days <= 30) else ('var(--orange)' if (last_seen_days is not none and last_seen_days <= 90) else 'var(--rose)') %}
+    <div class="vol-stat-num" style="color: {{ health_color }}; font-size:18px;">{{ last_seen_display }}</div>
+    {% else %}
+    <div class="vol-stat-num" style="color: var(--text-muted); font-size:18px;">Never</div>
+    {% endif %}
+    <div class="vol-stat-label">App Last Seen</div>
+  </div>
+</div>
+
+<!-- Info -->
+<div class="two-col mb-32">
+  <div class="card">
+    <h3 style="margin-bottom: 12px;">Preferred Campuses</h3>
+    <div class="flex gap-8">
+      {% for c in volunteer.get_campuses() %}
+      <span class="badge badge-{{ 'blue' if 'De Anza' in c else ('orange' if 'Foothill' in c else 'purple') }}">{{ c }}</span>
+      {% else %}
+      <span style="color: var(--text-muted); font-size: 14px;">No campus preference set</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom: 12px;">Availability</h3>
+    {% set avail = volunteer.get_availability() %}
+    {% if avail %}
+    {% for day, slots in avail.items() %}
+    <div style="font-size: 14px; color: var(--text-dim); margin-bottom: 4px;">
+      <strong>{{ day }}:</strong> {{ slots|join(', ') }}
+    </div>
+    {% endfor %}
+    {% else %}
+    <span style="color: var(--text-muted); font-size: 14px;">No availability set</span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Shift History -->
+<div class="detail-section">
+  <h2>Shift History</h2>
+  {% if shift_history %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Campus</th>
+          <th>Type</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sh in shift_history %}
+        <tr>
+          <td><a href="/shifts/{{ sh.shift_id }}" class="company-link">{{ sh.date }}</a></td>
+          <td>
+            <span class="badge badge-{{ 'blue' if 'De Anza' in sh.campus else ('orange' if 'Foothill' in sh.campus else 'purple') }}">
+              {{ sh.campus.split(' College')[0] }}
+            </span>
+          </td>
+          <td>{{ sh.shift_type }}</td>
+          <td>{{ sh.time }}</td>
+          <td>
+            <span class="badge badge-{{ 'green' if sh.signup_status in ('completed', 'confirmed', 'checked_in') else ('rose' if sh.signup_status in ('no_show', 'cancelled') else 'blue') }}">
+              {{ sh.signup_status }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state" style="padding: 30px;">
+    <p>No shift history yet.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateStatus(newStatus) {
+  apiCall('/api/volunteers/{{ volunteer.id }}', {
+    method: 'PATCH',
+    body: JSON.stringify({ status: newStatus }),
+  })
+  .then(function(d) {
+    showToast('Status updated to ' + newStatus);
+    setTimeout(function() { location.reload(); }, 500);
+  })
+  .catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+</script>
+{% endblock %}

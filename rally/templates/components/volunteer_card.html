@@ -1,0 +1,28 @@
+{# Compact volunteer info card #}
+{# Expected variables: volunteer (Volunteer object), stats (dict from get_volunteer_stats) #}
+{% set initials = volunteer.first_name[0] + volunteer.last_name[0] %}
+{% set colors = ['var(--primary)', 'var(--green)', 'var(--orange)', 'var(--purple)', 'var(--rose)'] %}
+{% set bg_color = colors[volunteer.id % 5] %}
+<div class="volunteer-card">
+  <div class="vol-avatar" style="background: {{ bg_color }};">{{ initials }}</div>
+  <div class="vol-info">
+    <div class="vol-name"><a href="/volunteers/{{ volunteer.id }}" style="color: inherit; text-decoration: none;">{{ volunteer.full_name }}</a></div>
+    <div class="vol-meta">
+      {{ volunteer.phone }}
+      {% if volunteer.get_campuses() %} &middot; {{ volunteer.get_campuses()|join(', ') }}{% endif %}
+    </div>
+  </div>
+  <div class="vol-badges">
+    <span class="badge badge-{{ 'green' if volunteer.status == 'active' else ('blue' if volunteer.status == 'new' else 'rose') }}">
+      {{ volunteer.status }}
+    </span>
+    {% if volunteer.is_youth %}
+    <span class="badge badge-orange">Youth</span>
+    {% endif %}
+    {% if stats %}
+    <span class="badge badge-{{ 'green' if stats.reliability_pct >= 90 else ('orange' if stats.reliability_pct >= 70 else 'rose') }}">
+      {{ stats.reliability_pct }}%
+    </span>
+    {% endif %}
+  </div>
+</div>

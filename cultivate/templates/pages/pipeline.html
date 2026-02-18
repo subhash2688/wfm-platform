@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Pipeline — Cultivate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Pipeline</div>
+  <h1>Prospect Pipeline</h1>
+  <p class="page-subtitle">{{ prospects|length }} companies tracked. Click any company to view details.</p>
+</div>
+
+<!-- Controls -->
+<div class="flex-between mb-16">
+  <div class="flex gap-8">
+    <button class="btn btn-sm btn-ghost" onclick="autoScoreAll()">Auto-Score All</button>
+    <button class="btn btn-sm btn-primary" onclick="showAddProspect()">+ Add Prospect</button>
+  </div>
+</div>
+
+<!-- Add prospect form (hidden) -->
+<div id="addProspectForm" class="card mb-16" style="display: none; padding: 24px;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+    <div class="form-group"><label>Company Name *</label><input type="text" id="newCompanyName"></div>
+    <div class="form-group">
+      <label>Industry</label>
+      <select id="newIndustry">
+        <option value="">Select...</option>
+        {% for ind in industries %}
+        <option>{{ ind }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group"><label>HQ City</label><input type="text" id="newHqCity"></div>
+    <div class="form-group">
+      <label>Nearest Campus</label>
+      <select id="newCampus">
+        <option value="">Select...</option>
+        <option>De Anza College</option>
+        <option>Foothill College</option>
+        <option>Chabot College</option>
+        <option>All Campuses</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Foundation Name</label><input type="text" id="newFoundation"></div>
+    <div class="form-group"><label>Focus Areas</label><input type="text" id="newFocus"></div>
+  </div>
+  <div class="flex gap-8 mt-16">
+    <button class="btn btn-sm btn-primary" onclick="addProspect()">Add</button>
+    <button class="btn btn-sm btn-ghost" onclick="hideAddProspect()">Cancel</button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <input type="text" id="searchInput" placeholder="Search companies..." style="min-width: 200px;">
+  <select id="filterStage">
+    <option value="">All Stages</option>
+    {% for s in stages %}
+    <option value="{{ s }}">{{ s }}</option>
+    {% endfor %}
+  </select>
+  <select id="filterIndustry">
+    <option value="">All Industries</option>
+    {% for ind in industries %}
+    <option value="{{ ind }}">{{ ind }}</option>
+    {% endfor %}
+  </select>
+  <select id="filterCampus">
+    <option value="">All Campuses</option>
+    <option value="De Anza College">De Anza</option>
+    <option value="Foothill College">Foothill</option>
+    <option value="Chabot College">Chabot</option>
+    <option value="All Campuses">All Campuses</option>
+  </select>
+</div>
+
+<div class="table-wrapper">
+  <table class="data-table" id="pipelineTable">
+    <thead>
+      <tr>
+        <th data-sort="company_name">Company <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="industry">Industry <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="hq_city">HQ City <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="nearest_campus">Campus <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="alignment_score">A <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="proximity_score">P <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="capacity_score">C <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="total_score">Total <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="pipeline_stage">Stage <span class="sort-arrow">&#9650;</span></th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="pipelineBody">
+      {% for p in prospects %}
+      <tr data-id="{{ p.id }}"
+          data-company="{{ p.company_name }}"
+          data-industry="{{ p.industry or '' }}"
+          data-campus="{{ p.nearest_campus or '' }}"
+          data-stage="{{ p.pipeline_stage }}">
+        <td><a href="/company/{{ p.id }}" class="company-link">{{ p.company_name }}</a></td>
+        <td>{{ p.industry or '—' }}</td>
+        <td>{{ p.hq_city or '—' }}</td>
+        <td>{{ p.nearest_campus or '—' }}</td>
+        <td class="editable" data-field="alignment_score" data-id="{{ p.id }}">{{ p.alignment_score }}</td>
+        <td class="editable" data-field="proximity_score" data-id="{{ p.id }}">{{ p.proximity_score }}</td>
+        <td class="editable" data-field="capacity_score" data-id="{{ p.id }}">{{ p.capacity_score }}</td>
+        <td><strong style="color: var(--primary);">{{ p.total_score }}</strong></td>
+        <td>
+          <select class="stage-select" data-id="{{ p.id }}" style="background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); font-size: 11px; padding: 3px 6px; border-radius: 4px;">
+            {% for s in stages %}
+            <option value="{{ s }}" {{ 'selected' if p.pipeline_stage == s }}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          <div class="flex gap-4">
+            <button class="btn-icon" title="Fetch 990" onclick="fetch990({{ p.id }})">&#128269;</button>
+            <button class="btn-icon" title="Generate Email" onclick="generateEmail({{ p.id }})">&#9993;</button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Import / Export -->
+<details class="mb-32" style="margin-top: 24px;">
+  <summary style="cursor: pointer; font-size: 16px; font-weight: 600; color: var(--text-dim); padding: 8px 0;">Import / Export &amp; Database ({{ db_stats.prospects }} prospects, {{ db_stats.foundations }} foundations, {{ db_stats.emails }} emails)</summary>
+  <div style="padding: 16px 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+    <div class="settings-section">
+      <h3>Import from Excel</h3>
+      <p>Re-import prospects from Corporate_Prospect_Tracker.xlsx.</p>
+      <button class="btn btn-sm btn-secondary" onclick="importExcel()">Import Excel</button>
+    </div>
+    <div class="settings-section">
+      <h3>Export</h3>
+      <p>Download current data as files.</p>
+      <a href="/api/export/excel" class="btn btn-sm btn-secondary">Export Excel</a>
+      <a href="/api/export/990-markdown" class="btn btn-sm btn-ghost">Export 990 MD</a>
+      <a href="/api/export/emails-markdown" class="btn btn-sm btn-ghost">Export Emails MD</a>
+    </div>
+    <div class="settings-section" style="border-color: var(--rose);">
+      <h3 style="color: var(--rose);">Danger Zone</h3>
+      <p>Drop all tables and re-import from Excel.</p>
+      <button class="btn btn-sm btn-ghost" style="color: var(--rose); border-color: var(--rose);" onclick="resetDB()">Reset Database</button>
+    </div>
+  </div>
+</details>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pipeline.js') }}"></script>
+{% endblock %}

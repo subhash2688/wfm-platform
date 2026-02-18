@@ -1,0 +1,88 @@
+{% extends "base_mobile.html" %}
+
+{% block content %}
+<div class="vol-page">
+  <a href="{{ url_for('volunteer.shifts_browse') }}" class="vol-back-link">&larr; All Shifts</a>
+
+  {% set campus_cls = 'de-anza' if 'De Anza' in shift.campus else ('foothill' if 'Foothill' in shift.campus else 'chabot') %}
+  <div class="vol-detail-card campus-{{ campus_cls }}">
+    <div class="vol-detail-campus">{{ shift.campus }}</div>
+    <h2 class="vol-detail-type">{{ shift.shift_type }}</h2>
+
+    <div class="vol-detail-row">
+      <span class="vol-detail-label">Date</span>
+      <span class="vol-detail-value">
+        {{ shift.date.strftime('%A, %B %-d, %Y') }}
+        {% if is_today %}<span class="vol-badge vol-badge-green">Today</span>{% endif %}
+      </span>
+    </div>
+    <div class="vol-detail-row">
+      <span class="vol-detail-label">Time</span>
+      <span class="vol-detail-value">{{ shift.start_time.strftime('%-I:%M %p') }} &ndash; {{ shift.end_time.strftime('%-I:%M %p') }} ({{ shift.duration_hours }}h)</span>
+    </div>
+    <div class="vol-detail-row">
+      <span class="vol-detail-label">Service</span>
+      <span class="vol-detail-value">{{ shift.service_type }}</span>
+    </div>
+    <div class="vol-detail-row">
+      <span class="vol-detail-label">Volunteers</span>
+      <span class="vol-detail-value">{{ filled }} / {{ shift.required_count }} filled</span>
+    </div>
+
+    <div class="vol-fill-bar" style="margin: 16px 0 8px;">
+      <div class="vol-fill-bar-inner {% if spots_left == 0 %}full{% elif filled >= shift.required_count // 2 %}partial{% else %}critical{% endif %}" style="width: {{ (filled / shift.required_count * 100) | int if shift.required_count > 0 else 100 }}%"></div>
+    </div>
+    <p class="vol-spots-text" style="text-align:center;">{{ spots_left }} spot{{ 's' if spots_left != 1 }} remaining</p>
+
+    {% if shift.notes %}
+    <div class="vol-detail-row">
+      <span class="vol-detail-label">Notes</span>
+      <span class="vol-detail-value">{{ shift.notes }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Who's coming -->
+  {% if other_attendees %}
+  <div class="vol-who-section">
+    <div class="vol-who-title">Who's coming</div>
+    <p class="vol-who-names">
+      {% set shown = other_attendees[:4] %}
+      {% set rest = other_attendees|length - 4 %}
+      {{ shown | map(attribute='first_name') | join(', ') }}{% if rest > 0 %} and {{ rest }} other{{ 's' if rest != 1 }}{% endif %}
+    </p>
+  </div>
+  {% endif %}
+
+  <!-- What to expect -->
+  {% if shift_info %}
+  <div class="vol-expect-card">
+    <div class="vol-expect-title">What to expect</div>
+    <div class="vol-expect-row"><span class="vol-expect-label">You'll be</span><span>{{ shift_info.what }}</span></div>
+    <div class="vol-expect-row"><span class="vol-expect-label">Wear</span><span>{{ shift_info.wear }}</span></div>
+    <div class="vol-expect-note">{{ shift_info.note }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Action button -->
+  <div class="vol-action-area">
+    {% if is_past %}
+      <div class="vol-badge vol-badge-gray" style="font-size:16px; padding:12px 24px;">This shift has passed</div>
+    {% elif my_signup %}
+      {% if my_signup.status == 'checked_in' %}
+        <div class="vol-badge vol-badge-green" style="font-size:16px; padding:12px 24px;">You're checked in!</div>
+      {% elif is_today %}
+        <button class="vol-btn vol-btn-green" onclick="checkIn({{ shift.id }})">I'm Here &mdash; Check In</button>
+        <button class="vol-btn vol-btn-danger-outline" onclick="cancelSignup({{ my_signup.id }})">Cancel Signup</button>
+      {% else %}
+        <div class="vol-badge vol-badge-amber" style="font-size:16px; padding:12px 24px; margin-bottom:12px;">You're signed up!</div>
+        <button class="vol-btn vol-btn-danger-outline" onclick="cancelSignup({{ my_signup.id }})">Cancel Signup</button>
+      {% endif %}
+    {% elif spots_left > 0 %}
+      <button class="vol-btn vol-btn-primary" onclick="signupForShift({{ shift.id }})">Sign Up for This Shift</button>
+    {% else %}
+      <div class="vol-badge vol-badge-gray" style="font-size:16px; padding:12px 24px;">This shift is full</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

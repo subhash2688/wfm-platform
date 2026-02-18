@@ -1,0 +1,108 @@
+{% extends "base_mobile.html" %}
+
+{% block content %}
+<div class="vol-page">
+  <!-- Avatar + name -->
+  <div class="vol-profile-header">
+    <div class="vol-avatar-wrapper">
+      {% if volunteer.photo %}
+      <img src="{{ url_for('static', filename='uploads/volunteers/' + volunteer.photo) }}" alt="{{ volunteer.full_name }}" class="vol-avatar-img" id="avatarImg">
+      {% else %}
+      <div class="vol-avatar" id="avatarInitials">{{ volunteer.first_name[0] }}{{ volunteer.last_name[0] }}</div>
+      {% endif %}
+      <button type="button" class="vol-photo-upload-btn" onclick="document.getElementById('photoInput').click()">Change Photo</button>
+      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
+    </div>
+    <h2 class="vol-profile-name">{{ volunteer.full_name }}</h2>
+    <p class="vol-profile-phone">{{ volunteer.phone }}</p>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="vol-stats-bar vol-stats-2col">
+    <div class="vol-stat">
+      <span class="vol-stat-value">{{ stats.total_shifts }}</span>
+      <span class="vol-stat-label">Shifts</span>
+    </div>
+    <div class="vol-stat">
+      <span class="vol-stat-value">{{ stats.total_hours }}</span>
+      <span class="vol-stat-label">Hours</span>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  {% if badges %}
+  <div class="vol-section">
+    <h3 class="vol-section-title">Badges Earned</h3>
+    <div class="vol-badges-grid">
+      {% for b in badges %}
+      <div class="vol-badge-card">
+        <span class="vol-badge-icon-lg">{{ b.icon }}</span>
+        <span class="vol-badge-name">{{ b.name }}</span>
+        <span class="vol-badge-req">{{ b.threshold }}+ shifts</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Campus preferences -->
+  <div class="vol-section">
+    <h3 class="vol-section-title">My Campuses</h3>
+    <form id="profileForm" class="vol-profile-form">
+      <div class="vol-checkbox-group">
+        {% set my_campuses = volunteer.get_campuses() %}
+        {% for campus in campuses %}
+        <label class="vol-checkbox-label">
+          <input type="checkbox" name="campuses" value="{{ campus }}" {{ 'checked' if campus in my_campuses }}>
+          <span>{{ campus }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <h3 class="vol-section-title" style="margin-top: 20px;">Volunteering Service Preferences</h3>
+      <div class="vol-checkbox-group">
+        {% set my_types = volunteer.get_shift_types() %}
+        {% for st in shift_types %}
+        <label class="vol-checkbox-label">
+          <input type="checkbox" name="shift_types" value="{{ st }}" {{ 'checked' if st in my_types }}>
+          <span>{{ st }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <h3 class="vol-section-title" style="margin-top: 20px;">My Availability</h3>
+      <p style="font-size:13px; color:var(--vol-text-muted); margin: -8px 0 12px;">When are you generally free to volunteer?</p>
+      {% set my_avail = volunteer.get_availability() %}
+      <div class="vol-avail-grid">
+        {% for day in days_of_week %}
+        <div class="vol-avail-day">
+          <div class="vol-avail-day-label">{{ day[:3] }}</div>
+          {% for slot in availability_slots %}
+          <label class="vol-avail-slot {{ 'vol-avail-on' if slot in my_avail.get(day, []) else '' }}">
+            <input type="checkbox" class="vol-avail-cb" data-day="{{ day }}" data-slot="{{ slot }}"
+                   {{ 'checked' if slot in my_avail.get(day, []) }}>
+            <span>{{ slot[0] }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <h3 class="vol-section-title" style="margin-top: 20px;">Youth Volunteer</h3>
+      <div class="vol-checkbox-group">
+        <label class="vol-checkbox-label">
+          <input type="checkbox" name="is_youth" {{ 'checked' if volunteer.is_youth }}>
+          <span>Yes, I am a youth volunteer (under 18)</span>
+        </label>
+      </div>
+
+      <button type="button" class="vol-btn vol-btn-secondary" onclick="updateProfile()">Save Preferences</button>
+    </form>
+  </div>
+
+  <!-- Logout -->
+  <div class="vol-section" style="padding-bottom: 32px;">
+    <a href="{{ url_for('volunteer.logout') }}" class="vol-btn vol-btn-danger-outline">Sign Out</a>
+  </div>
+</div>
+{% endblock %}

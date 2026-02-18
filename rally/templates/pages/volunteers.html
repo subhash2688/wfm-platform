@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Volunteers — Rally{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Volunteers</div>
+  <h1>Volunteer Roster</h1>
+  <p class="page-subtitle">{{ volunteers|length }} volunteers registered. Track stats, manage profiles, and export the full roster.</p>
+</div>
+
+<!-- Create form (hidden by default) -->
+<div class="card mb-24" style="display: none;" id="createVolunteerForm">
+  <h3 style="margin-bottom: 16px;">Add New Volunteer</h3>
+  <form onsubmit="createVolunteer(event)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+      <div class="form-group">
+        <label>First Name *</label>
+        <input type="text" name="first_name" required>
+      </div>
+      <div class="form-group">
+        <label>Last Name *</label>
+        <input type="text" name="last_name" required>
+      </div>
+      <div class="form-group">
+        <label>Phone *</label>
+        <input type="text" name="phone" placeholder="(408) 555-0000" required>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" name="email">
+      </div>
+      <div class="form-group">
+        <label>Preferred Campuses</label>
+        <div class="flex gap-12" style="padding-top: 8px;">
+          {% for c in campuses %}
+          <label style="font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--text-dim); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" name="preferred_campuses" value="{{ c }}"> {{ c.split(' College')[0] }}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Youth Volunteer</label>
+        <div style="padding-top: 8px;">
+          <label style="font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--text-dim); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <input type="checkbox" name="is_youth"> Under 18
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+      <button type="submit" class="btn btn-sm btn-primary">Add Volunteer</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="showCreateVolunteer()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <input type="text" id="searchInput" placeholder="Search volunteers..." style="width: 220px;">
+  <select id="filterCampus">
+    <option value="">All Campuses</option>
+    {% for c in campuses %}
+    <option value="{{ c }}">{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select id="filterStatus">
+    <option value="">All Statuses</option>
+    <option value="active">Active</option>
+    <option value="new">New</option>
+    <option value="inactive">Inactive</option>
+  </select>
+  <div style="flex:1;"></div>
+  <a href="/api/export/csv" class="btn btn-sm btn-secondary">&#8615; CSV</a>
+  <button class="btn btn-sm btn-primary" onclick="showCreateVolunteer()">+ New Volunteer</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrapper">
+  <table class="data-table" id="volunteersTable">
+    <thead>
+      <tr>
+        <th data-sort="name">Name <span class="sort-arrow">&#9650;</span></th>
+        <th>Phone</th>
+        <th>Campuses</th>
+        <th data-sort="shifts">Shifts <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="hours">Hours <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="reliability">Reliability <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="status">Status <span class="sort-arrow">&#9650;</span></th>
+        <th title="Last time volunteer opened the app">App Activity</th>
+      </tr>
+    </thead>
+    <tbody id="volunteersBody">
+      {% for v in volunteers %}
+      {% set seen_days = ((now - v.last_seen).days if v.last_seen else none) %}
+      {% set health = 'green' if (seen_days is not none and seen_days <= 30) else ('orange' if (seen_days is not none and seen_days <= 90) else 'gray') %}
+      <tr data-id="{{ v.id }}"
+          data-name="{{ v.full_name }}"
+          data-campuses="{{ v.get_campuses()|join(', ') }}"
+          data-status="{{ v.status }}"
+          data-shifts="{{ v.stats.total_shifts }}"
+          data-hours="{{ v.stats.total_hours }}"
+          data-reliability="{{ v.stats.reliability_pct }}">
+        <td>
+          <a href="/volunteers/{{ v.id }}" class="company-link">{{ v.full_name }}</a>
+        </td>
+        <td>{{ v.phone }}</td>
+        <td>
+          {% for c in v.get_campuses() %}
+          <span class="badge badge-{{ campus_colors.get(c, 'blue') }}" style="margin-right: 4px;">
+            {{ c.replace(' College', '') }}
+          </span>
+          {% endfor %}
+        </td>
+        <td>{{ v.stats.total_shifts }}</td>
+        <td>{{ v.stats.total_hours }}h</td>
+        <td>
+          <span style="color: {{ 'var(--green)' if v.stats.reliability_pct >= 90 else ('var(--orange)' if v.stats.reliability_pct >= 70 else 'var(--rose)') }}; font-weight: 600;">
+            {{ v.stats.reliability_pct }}%
+          </span>
+        </td>
+        <td>
+          <span class="badge badge-{{ 'green' if v.status == 'active' else ('blue' if v.status == 'new' else 'rose') }}">
+            {{ v.status }}
+          </span>
+          {% if v.is_youth %}
+          <span class="badge badge-orange" style="margin-left: 4px;">Youth</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="health-dot health-{{ health }}" title="{{ ('Last seen ' + seen_days|string + ' days ago') if seen_days is not none else 'Never opened app' }}"></span>
+          <span style="font-size:12px; color:var(--text-muted);">
+            {% if seen_days is none %}Never
+            {% elif seen_days == 0 %}Today
+            {% elif seen_days == 1 %}Yesterday
+            {% elif seen_days < 30 %}{{ seen_days }}d ago
+            {% else %}{{ seen_days // 30 }}mo ago{% endif %}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if not volunteers %}
+<div class="empty-state">
+  <div class="empty-icon">&#128101;</div>
+  <h3>No volunteers yet</h3>
+  <p>Add your first volunteer to start building the roster.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/volunteers.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Food Movement — Corporate Fundraising Strategy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0F0A;
+    --surface: #161A12;
+    --surface2: #1E2318;
+    --accent: #A8D45E;
+    --accent-dim: #7BA33A;
+    --accent-glow: rgba(168, 212, 94, 0.12);
+    --text: #E8E6E1;
+    --text-dim: #9A9890;
+    --text-muted: #6B6962;
+    --orange: #E8944A;
+    --blue: #5BA4CF;
+    --rose: #CF6B7E;
+    --purple: #9B8EC4;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .app {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid rgba(168,212,94,0.08);
+    display: flex;
+    flex-direction: column;
+    padding: 32px 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 24px;
+  }
+
+  .sidebar-logo h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+
+  .sidebar-logo p {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .nav-section {
+    padding: 0 16px;
+    margin-bottom: 8px;
+  }
+
+  .nav-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 0 8px;
+    margin-bottom: 8px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    position: relative;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+
+  .nav-item.active {
+    background: var(--accent-glow);
+    color: var(--accent);
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .nav-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-num {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  /* Main content */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 48px 64px;
+    scroll-behavior: smooth;
+  }
+
+  .main::-webkit-scrollbar { width: 6px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+
+  .slide {
+    display: none;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .slide.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  .slide h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .slide-subtitle {
+    font-size: 16px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 640px;
+    margin-bottom: 40px;
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: all 0.25s;
+  }
+
+  .card:hover {
+    border-color: rgba(168,212,94,0.15);
+    transform: translateY(-2px);
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-top: 12px;
+    font-weight: 600;
+  }
+
+  /* Stat row */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+
+  .stat-card .num {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-card .label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 32px;
+    font-size: 13px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-weight: 600;
+  }
+
+  .data-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--text-dim);
+  }
+
+  .data-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-green { background: rgba(168,212,94,0.12); color: var(--accent); }
+  .badge-blue { background: rgba(91,164,207,0.12); color: var(--blue); }
+  .badge-orange { background: rgba(232,148,74,0.12); color: var(--orange); }
+  .badge-purple { background: rgba(155,142,196,0.12); color: var(--purple); }
+  .badge-rose { background: rgba(207,107,126,0.12); color: var(--rose); }
+
+  /* Pipeline */
+  .pipeline {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+
+  .pipeline-stage {
+    flex: 1;
+    min-width: 120px;
+    padding: 20px 16px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.04);
+    text-align: center;
+    position: relative;
+  }
+
+  .pipeline-stage:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .pipeline-stage:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+
+  .pipeline-stage .stage-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .pipeline-stage .stage-icon { font-size: 20px; margin-bottom: 6px; }
+  .pipeline-stage .stage-desc { font-size: 12px; color: var(--text-dim); line-height: 1.45; }
+
+  .pipeline-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--accent-dim);
+    font-size: 18px;
+    padding: 0 2px;
+  }
+
+  /* Automation flow */
+  .auto-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+
+  .auto-step {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .auto-step:last-child { border-bottom: none; }
+
+  .auto-step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .auto-step-content { flex: 1; }
+  .auto-step-content h4 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .auto-step-content p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+  .tool-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-dim);
+    margin-right: 6px;
+    margin-top: 8px;
+  }
+
+  /* Section headers within slides */
+  .section-header {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .callout {
+    background: var(--accent-glow);
+    border: 1px solid rgba(168,212,94,0.15);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+
+  .callout p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .callout strong { color: var(--accent); }
+
+  /* Footer nav */
+  .slide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-primary:hover { background: #b8e06e; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+  .page-indicator {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .col-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .col-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .col-card li {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 8px;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .col-card li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent-dim);
+    font-size: 12px;
+  }
+
+  .col-card ul { list-style: none; }
+
+  /* Timeline */
+  .timeline { margin-bottom: 32px; }
+
+  .timeline-item {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 24px;
+    position: relative;
+  }
+
+  .timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 40px;
+    bottom: 0;
+    width: 2px;
+    background: rgba(168,212,94,0.15);
+  }
+
+  .timeline-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .timeline-content h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .timeline-content p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+  .timeline-content .time-label {
+    font-size: 11px;
+    color: var(--accent-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { width: 220px; min-width: 220px; }
+    .main { padding: 32px; }
+    .stat-row { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <h2>🌾 World Food Movement</h2>
+      <p>California Chapter — Corporate Strategy</p>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Strategy</div>
+      <div class="nav-item active" data-slide="0">
+        <span class="nav-num">1</span> The Opportunity
+      </div>
+      <div class="nav-item" data-slide="1">
+        <span class="nav-num">2</span> How Corporate Giving Works
+      </div>
+      <div class="nav-item" data-slide="2">
+        <span class="nav-num">3</span> Our Geographic Edge
+      </div>
+      <div class="nav-item" data-slide="3">
+        <span class="nav-num">4</span> The Fundraising Pipeline
+      </div>
+    </div>
+
+    <div class="nav-section" style="margin-top: 8px;">
+      <div class="nav-section-label">Automation</div>
+      <div class="nav-item" data-slide="4">
+        <span class="nav-num">5</span> Where Agents Help
+      </div>
+      <div class="nav-item" data-slide="5">
+        <span class="nav-num">6</span> The Automation Toolkit
+      </div>
+      <div class="nav-item" data-slide="6">
+        <span class="nav-num">7</span> Claude Code Workflows
+      </div>
+    </div>
+
+    <div class="nav-section" style="margin-top: 8px;">
+      <div class="nav-section-label">Action</div>
+      <div class="nav-item" data-slide="7">
+        <span class="nav-num">8</span> 90-Day Launch Plan
+      </div>
+      <div class="nav-item" data-slide="8">
+        <span class="nav-num">9</span> Investment & ROI
+      </div>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- SLIDE 0: The Opportunity -->
+    <div class="slide active" data-index="0">
+      <span class="slide-tag">Why Now</span>
+      <h1>Corporate Giving Is Our Biggest Untapped Channel</h1>
+      <p class="slide-subtitle">We serve three colleges in the heart of Silicon Valley. Hundreds of companies within a 15-mile radius have active giving programs. We haven't asked any of them yet.</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="num">3</div>
+          <div class="label">Campuses Served</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">1 in 3</div>
+          <div class="label">CA community college students face food insecurity</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">$0</div>
+          <div class="label">Currently from corporate sources</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>The gap:</strong> Companies in Cupertino, Mountain View, and Hayward actively fund local nonprofits — but they need to be approached with a clear strategy. We're building that strategy today.</p>
+      </div>
+
+      <div class="section-header">Our Campuses</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>College</th><th>Location</th><th>Region</th><th>Key Employers Nearby</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text);font-weight:600">De Anza College</td>
+            <td>Cupertino</td>
+            <td><span class="badge badge-green">South Bay</span></td>
+            <td>Apple, Synopsys, Juniper Networks, Applied Materials</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Foothill College</td>
+            <td>Los Altos Hills</td>
+            <td><span class="badge badge-green">South Bay</span></td>
+            <td>Google, Intuit, HP Enterprise, Palo Alto Networks</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Chabot College</td>
+            <td>Hayward</td>
+            <td><span class="badge badge-blue">East Bay</span></td>
+            <td>Kaiser Permanente, Clorox, Ross Stores</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="slide-footer">
+        <div></div>
+        <span class="page-indicator">1 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 1: How Corporate Giving Works -->
+    <div class="slide" data-index="1">
+      <span class="slide-tag">Fundamentals</span>
+      <h1>Four Ways Companies Give Money</h1>
+      <p class="slide-subtitle">Corporate philanthropy flows through distinct channels — each with different processes, timelines, and effort levels. We should pursue all four.</p>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(168,212,94,0.12)">🏛️</div>
+          <h3>Corporate Foundations</h3>
+          <p>Separate legal entities with formal grant cycles. Published RFPs, structured applications, dedicated program officers. Think Google.org, Cisco Foundation, Wells Fargo Foundation.</p>
+          <span class="card-tag badge badge-green">$5K – $100K+ · 3–6 month cycle</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(91,164,207,0.12)">🤝</div>
+          <h3>CSR Budgets</h3>
+          <p>Internal budgets managed by marketing, HR, or community teams. More flexible, relationship-driven. Faster decisions, but harder to discover — not always listed publicly.</p>
+          <span class="card-tag badge badge-blue">$1K – $50K · 2–12 week turnaround</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(232,148,74,0.12)">💰</div>
+          <h3>Employee Matching</h3>
+          <p>Companies match donations their employees make, usually dollar-for-dollar. Apple, Google, Microsoft, Salesforce are among the most generous. Managed via Benevity, YourCause, etc.</p>
+          <span class="card-tag badge badge-orange">$100 – $25K per person · Ongoing</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(155,142,196,0.12)">📦</div>
+          <h3>In-Kind Giving</h3>
+          <p>Food products, software licenses, volunteer days, pro-bono services. Not cash, but offsets operating costs and often deepens relationships that lead to cash gifts later.</p>
+          <span class="card-tag badge badge-purple">Variable · 1–4 weeks</span>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Key insight:</strong> Start with corporate foundations (structured, discoverable) and CSR budgets (relationship-driven, faster). Layer in matching gifts and in-kind as relationships deepen.</p>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(0)">← Back</button>
+        <span class="page-indicator">2 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(2)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Geographic Edge -->
+    <div class="slide" data-index="2">
+      <span class="slide-tag">Our Advantage</span>
+      <h1>We're in Their Backyard</h1>
+      <p class="slide-subtitle">Companies report community impact to shareholders. A tech company in Cupertino wants to say "we fed 500 students at the college down the road." That's our pitch.</p>
+
+      <div class="section-header">Why Geography Wins Deals</div>
+      <div class="two-col">
+        <div class="col-card">
+          <h3>🎯 What Companies Want</h3>
+          <ul>
+            <li>Visible impact near their headquarters</li>
+            <li>Employee engagement opportunities within driving distance</li>
+            <li>Local stories for their annual CSR reports</li>
+            <li>Photo ops and volunteer days they can publicize</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h3>✅ What We Offer</h3>
+          <ul>
+            <li>Three campuses within 15 miles of major tech HQs</li>
+            <li>Students from their own communities</li>
+            <li>Tangible, measurable impact (meals served, students fed)</li>
+            <li>Volunteer-ready food pantry operations</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-header">The Pitch Framework</div>
+      <div class="auto-flow">
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(168,212,94,0.12);color:var(--accent)">1</div>
+          <div class="auto-step-content">
+            <h4>Lead with proximity</h4>
+            <p>"We serve students experiencing food insecurity within 5 miles of your headquarters."</p>
+          </div>
+        </div>
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(91,164,207,0.12);color:var(--blue)">2</div>
+          <div class="auto-step-content">
+            <h4>Quantify the need</h4>
+            <p>"1 in 3 community college students in our district faces food insecurity. Last semester, we served [X] students."</p>
+          </div>
+        </div>
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(232,148,74,0.12);color:var(--orange)">3</div>
+          <div class="auto-step-content">
+            <h4>Offer tangible partnership value</h4>
+            <p>"For $[amount], you can feed [X] students for a semester — with on-campus recognition, volunteer days, and quarterly impact reports."</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+        <span class="page-indicator">3 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(3)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Pipeline -->
+    <div class="slide" data-index="3">
+      <span class="slide-tag">Process</span>
+      <h1>The 7-Step Fundraising Pipeline</h1>
+      <p class="slide-subtitle">Every corporate gift follows the same path. Master this pipeline and you can systematically bring in funding on a repeating cycle.</p>
+
+      <div class="pipeline">
+        <div class="pipeline-stage">
+          <div class="stage-icon">🔍</div>
+          <div class="stage-name">Research</div>
+          <div class="stage-desc">Find companies with giving programs that align</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">👤</div>
+          <div class="stage-name">Identify</div>
+          <div class="stage-desc">Find the right contact person</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">✉️</div>
+          <div class="stage-name">Outreach</div>
+          <div class="stage-desc">Personalized first touch</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">🤝</div>
+          <div class="stage-name">Meeting</div>
+          <div class="stage-desc">Discovery call — 80% listening</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">📄</div>
+          <div class="stage-name">Proposal</div>
+          <div class="stage-desc">Tailored ask based on their priorities</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">✅</div>
+          <div class="stage-name">Decision</div>
+          <div class="stage-desc">Follow up, answer questions</div>
+        </div>
+        <div class="pipeline-arrow">›</div>
+        <div class="pipeline-stage">
+          <div class="stage-icon">💚</div>
+          <div class="stage-name">Steward</div>
+          <div class="stage-desc">Thank, report, renew</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Critical point:</strong> Steps 1–3 (Research, Identify, Outreach) are where 80% of your time goes — and where automation has the biggest impact. That's what we'll focus on next.</p>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Back</button>
+        <span class="page-indicator">4 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(4)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Where Agents Help -->
+    <div class="slide" data-index="4">
+      <span class="slide-tag">Automation Opportunity</span>
+      <h1>What Takes Hours — Done in Minutes</h1>
+      <p class="slide-subtitle">Here's the honest breakdown: some parts of this pipeline are perfect for AI agents, and some parts only a human can do. Let's be clear about both.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>Task</th><th>Manual Time</th><th>With Agents</th><th>Automatable?</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text)">Research company giving programs</td>
+            <td>30–60 min per company</td>
+            <td>2–5 min per company</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Find CSR/Foundation contacts</td>
+            <td>15–30 min per company</td>
+            <td>1–3 min per company</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Analyze 990 filings for grant history</td>
+            <td>45–90 min per foundation</td>
+            <td>5–10 min per foundation</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Draft personalized outreach emails</td>
+            <td>20–30 min per email</td>
+            <td>2–3 min per email</td>
+            <td><span class="badge badge-green">High</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Track deadlines and follow-ups</td>
+            <td>Ongoing, error-prone</td>
+            <td>Automated reminders</td>
+            <td><span class="badge badge-blue">Medium</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Draft grant proposals</td>
+            <td>8–20 hours per proposal</td>
+            <td>2–5 hours (AI-assisted draft)</td>
+            <td><span class="badge badge-blue">Medium</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Discovery meetings</td>
+            <td>30–60 min per meeting</td>
+            <td>You — relationship building</td>
+            <td><span class="badge badge-rose">Human Only</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text)">Stewardship and relationship nurturing</td>
+            <td>Ongoing</td>
+            <td>You — trust and authenticity</td>
+            <td><span class="badge badge-rose">Human Only</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="callout">
+        <p><strong>Bottom line:</strong> If you're prospecting 50 companies manually, that's roughly <strong>100+ hours</strong> of research alone. With AI agents, you can compress that to <strong>10–15 hours</strong> — freeing you to focus on relationships and proposals where your time actually closes deals.</p>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Back</button>
+        <span class="page-indicator">5 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(5)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: The Automation Toolkit -->
+    <div class="slide" data-index="5">
+      <span class="slide-tag">Tools</span>
+      <h1>The Automation Toolkit</h1>
+      <p class="slide-subtitle">Three layers of tooling — from free (Claude Code) to paid platforms — depending on budget and scale.</p>
+
+      <div class="section-header">Layer 1: Claude Code (Free / Low Cost)</div>
+      <div class="card-grid">
+        <div class="card" style="border-color:rgba(168,212,94,0.2)">
+          <div class="card-icon" style="background:rgba(168,212,94,0.12)">⚡</div>
+          <h3>Prospect Research Agent</h3>
+          <p>Claude Code can scrape company websites, read CSR pages, pull 990 data from ProPublica, and build enriched prospect profiles — all from your terminal.</p>
+          <span class="card-tag badge badge-green">Start here</span>
+        </div>
+        <div class="card" style="border-color:rgba(168,212,94,0.2)">
+          <div class="card-icon" style="background:rgba(168,212,94,0.12)">✍️</div>
+          <h3>Outreach Drafter</h3>
+          <p>Feed it your templates + company research and it generates personalized emails for each prospect, referencing their specific CSR priorities and location.</p>
+          <span class="card-tag badge badge-green">Start here</span>
+        </div>
+        <div class="card" style="border-color:rgba(168,212,94,0.2)">
+          <div class="card-icon" style="background:rgba(168,212,94,0.12)">📊</div>
+          <h3>990 Analyzer</h3>
+          <p>Download foundation 990s and have Claude Code extract who they've funded, how much, and in what focus areas — building your competitive intelligence automatically.</p>
+          <span class="card-tag badge badge-green">Start here</span>
+        </div>
+      </div>
+
+      <div class="section-header">Layer 2: Grant Discovery Platforms ($200–$500/mo)</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(91,164,207,0.12)">🔎</div>
+          <h3>Instrumentl</h3>
+          <p>AI-powered grant discovery with 400K+ funders. Matches your mission to open opportunities, tracks deadlines, and now offers AI-assisted proposal drafting. Based in Oakland — they know Bay Area funders.</p>
+          <span class="card-tag badge badge-blue">~$299/mo · Best for grant discovery</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(91,164,207,0.12)">📋</div>
+          <h3>Candid / Foundation Directory</h3>
+          <p>The gold standard for foundation research. Merged GuideStar + Foundation Directory data. Search by geography, focus area, and past grants. Essential for prospect research.</p>
+          <span class="card-tag badge badge-blue">~$219/mo · Best for deep research</span>
+        </div>
+      </div>
+
+      <div class="section-header">Layer 3: Sales Intelligence (Scale-up Phase)</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon" style="background:rgba(155,142,196,0.12)">🤖</div>
+          <h3>Apollo.io</h3>
+          <p>Find verified contact info for CSR managers, foundation officers, and community affairs leads. Free tier available with 265M+ contacts. Automate outreach sequences.</p>
+          <span class="card-tag badge badge-purple">Free tier available · Contact finding</span>
+        </div>
+        <div class="card">
+          <div class="card-icon" style="background:rgba(155,142,196,0.12)">🧱</div>
+          <h3>Clay</h3>
+          <p>AI agent ("Claygent") that researches companies at scale — finds CSR pages, extracts giving priorities, scores prospects, and personalizes outreach. Powerful but steep learning curve.</p>
+          <span class="card-tag badge badge-purple">From $149/mo · Advanced automation</span>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Back</button>
+        <span class="page-indicator">6 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(6)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Claude Code Workflows -->
+    <div class="slide" data-index="6">
+      <span class="slide-tag">Deep Dive</span>
+      <h1>Claude Code: Your Research Agent</h1>
+      <p class="slide-subtitle">Here's exactly how to use Claude Code to automate the most time-consuming parts of corporate prospecting. No paid tools required to start.</p>
+
+      <div class="section-header">Workflow 1: Company Research Pipeline</div>
+      <div class="auto-flow">
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(168,212,94,0.12);color:var(--accent)">1</div>
+          <div class="auto-step-content">
+            <h4>Start with a seed list of Bay Area companies</h4>
+            <p>Give Claude Code your target list (from the tracker we built) and ask it to research each company's CSR/giving program. It visits their website, finds the community or foundation page, and extracts focus areas, grant sizes, and application info.</p>
+            <span class="tool-tag">claude code</span><span class="tool-tag">web scraping</span><span class="tool-tag">MCP tools</span>
+          </div>
+        </div>
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(91,164,207,0.12);color:var(--blue)">2</div>
+          <div class="auto-step-content">
+            <h4>Pull 990 data for foundations</h4>
+            <p>Claude Code can query ProPublica's Nonprofit Explorer API to pull Form 990 data — showing who each foundation has funded, grant amounts, and focus areas. This tells you if they've funded similar orgs.</p>
+            <span class="tool-tag">ProPublica API</span><span class="tool-tag">990 analysis</span>
+          </div>
+        </div>
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(232,148,74,0.12);color:var(--orange)">3</div>
+          <div class="auto-step-content">
+            <h4>Score and prioritize automatically</h4>
+            <p>Based on the research, Claude Code populates your prospect tracker with alignment scores, proximity scores, and capacity scores — giving you a ranked list of who to approach first.</p>
+            <span class="tool-tag">spreadsheet generation</span><span class="tool-tag">scoring logic</span>
+          </div>
+        </div>
+        <div class="auto-step">
+          <div class="auto-step-num" style="background:rgba(207,107,126,0.12);color:var(--rose)">4</div>
+          <div class="auto-step-content">
+            <h4>Generate personalized outreach drafts</h4>
+            <p>For your top 15 prospects, Claude Code drafts individualized outreach emails referencing each company's specific CSR priorities, geographic focus, and what they've funded before. You review, edit, and send.</p>
+            <span class="tool-tag">email drafting</span><span class="tool-tag">personalization</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">Workflow 2: Grant Application Support</div>
+      <div class="two-col">
+        <div class="col-card">
+          <h3>📝 Proposal Drafting</h3>
+          <ul>
+            <li>Feed Claude Code the RFP/application questions + your org data</li>
+            <li>It generates first-draft narrative sections</li>
+            <li>Pulls in relevant impact data and talking points</li>
+            <li>You refine the voice and add personal stories</li>
+          </ul>
+        </div>
+        <div class="col-card">
+          <h3>📊 Impact Report Generation</h3>
+          <ul>
+            <li>Feed it your raw program data (students served, meals distributed)</li>
+            <li>Generates polished quarterly impact reports</li>
+            <li>Creates funder-specific versions highlighting what each cares about</li>
+            <li>Outputs as Word docs or PDFs ready to send</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>How to get started:</strong> Install Claude Code from your terminal (<code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:12px">npm install -g @anthropic-ai/claude-code</code>), then point it at your prospect tracker and say: "Research the top 10 companies in this spreadsheet — find their CSR/giving programs, pull 990 data if they have a foundation, score them, and draft outreach emails." It handles the rest.</p>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(5)">← Back</button>
+        <span class="page-indicator">7 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(7)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: 90-Day Plan -->
+    <div class="slide" data-index="7">
+      <span class="slide-tag">Execution</span>
+      <h1>90-Day Launch Plan</h1>
+      <p class="slide-subtitle">A phased approach that starts with quick wins and scales up. Designed for someone doing this alongside other responsibilities.</p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div class="timeline-content">
+            <div class="time-label">Weeks 1–2: Build the Foundation</div>
+            <h4>Research & Setup</h4>
+            <p>Gather impact data from all three campuses. Set up Claude Code. Run the research pipeline on 30–50 Bay Area companies. Build your scored prospect list. Sign up for Instrumentl trial to discover open grant opportunities.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div class="timeline-content">
+            <div class="time-label">Weeks 3–4: First Contact</div>
+            <h4>Outreach Launch</h4>
+            <p>Send personalized outreach to your top 15 prospects (Claude Code drafts, you edit and send). Submit applications for any open foundation grants with near-term deadlines. Follow up after 5–7 days on non-responses.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <div class="timeline-content">
+            <div class="time-label">Weeks 5–8: Deepen Relationships</div>
+            <h4>Meetings & Proposals</h4>
+            <p>Conduct discovery meetings with interested companies. Use Claude Code to draft tailored proposals based on meeting notes. Invite contacts to campus visits or food distribution events. Continue outreach to next batch of prospects.</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <div class="timeline-content">
+            <div class="time-label">Weeks 9–12: Close & Scale</div>
+            <h4>Secure First Commitments</h4>
+            <p>Follow up on pending proposals. Secure first corporate gifts. Begin stewardship (thank-yous, impact updates). Evaluate your pipeline conversion rates. Expand prospect list and begin cycle 2.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(6)">← Back</button>
+        <span class="page-indicator">8 / 9</span>
+        <button class="btn btn-primary" onclick="goTo(8)">Next →</button>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Investment & ROI -->
+    <div class="slide" data-index="8">
+      <span class="slide-tag">The Ask</span>
+      <h1>Investment & Expected Return</h1>
+      <p class="slide-subtitle">What we need to invest, and what we can realistically expect in the first 12 months.</p>
+
+      <div class="section-header">Tooling Costs</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Tool</th><th>Purpose</th><th>Monthly Cost</th><th>Priority</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Claude Code / Claude Pro</td>
+            <td>Research, drafting, 990 analysis, email personalization</td>
+            <td>$20/mo</td>
+            <td><span class="badge badge-green">Start now</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Instrumentl</td>
+            <td>Grant discovery, deadline tracking, funder matching</td>
+            <td>~$299/mo</td>
+            <td><span class="badge badge-blue">Month 1</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Apollo.io (Free tier)</td>
+            <td>Contact finding for CSR managers</td>
+            <td>$0</td>
+            <td><span class="badge badge-green">Start now</span></td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:600">Candid / Foundation Directory</td>
+            <td>Deep foundation research</td>
+            <td>~$219/mo</td>
+            <td><span class="badge badge-orange">Month 2–3</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section-header">Realistic First-Year Targets</div>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="num">50</div>
+          <div class="label">Companies researched and scored</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">15–20</div>
+          <div class="label">Active conversations</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">5–8</div>
+          <div class="label">Funded partnerships (Year 1 target)</div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <p><strong>Conservative scenario:</strong> If 5 companies fund at an average of $10K–$25K, that's <strong>$50K–$125K in new revenue</strong> from a channel that currently brings in $0. The tooling investment pays for itself many times over. And these relationships renew — Year 2 should double with renewals plus new prospects.</p>
+      </div>
+
+      <div class="two-col">
+        <div class="col-card" style="border-color:rgba(168,212,94,0.2)">
+          <h3>🚀 Immediate Next Steps</h3>
+          <ul>
+            <li>Finalize campus impact data from all three sites</li>
+            <li>Set up Claude Code and run first research batch</li>
+            <li>Start Instrumentl 14-day free trial</li>
+            <li>Create Apollo.io free account for contact finding</li>
+            <li>Send first 15 outreach emails by end of Week 4</li>
+          </ul>
+        </div>
+        <div class="col-card" style="border-color:rgba(91,164,207,0.2)">
+          <h3>📋 What We Need From the Team</h3>
+          <ul>
+            <li>Updated student-served numbers per campus per semester</li>
+            <li>Meals/food packages distributed (monthly)</li>
+            <li>Student demographic data and success stories</li>
+            <li>Approval on tooling budget (~$300–$500/mo initially)</li>
+            <li>Board connections to any corporate contacts</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-footer">
+        <button class="btn btn-ghost" onclick="goTo(7)">← Back</button>
+        <span class="page-indicator">9 / 9</span>
+        <div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const slides = document.querySelectorAll('.slide');
+  const mainEl = document.getElementById('main');
+
+  function goTo(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    navItems.forEach(n => n.classList.remove('active'));
+    
+    slides[index].classList.add('active');
+    navItems[index].classList.add('active');
+    mainEl.scrollTop = 0;
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const idx = parseInt(item.dataset.slide);
+      goTo(idx);
+    });
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    const current = [...slides].findIndex(s => s.classList.contains('active'));
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (current < slides.length - 1) goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (current > 0) goTo(current - 1);
+    }
+  });
+</script>
+
+</body>
+</html>

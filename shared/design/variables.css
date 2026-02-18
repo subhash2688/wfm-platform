@@ -1,0 +1,51 @@
+/* WFM Brand — extracted from wfmamerica.org */
+:root {
+  /* Primary palette */
+  --primary: #0067FF;
+  --primary-hover: #005EE9;
+  --primary-light: #E7F6FF;
+  --primary-glow: rgba(0, 103, 255, 0.08);
+
+  /* Text */
+  --text: #0F172A;
+  --text-dim: #364151;
+  --text-muted: #9CA3AF;
+
+  /* Backgrounds */
+  --bg: #E7F6FF;
+  --surface: #FFFFFF;
+  --surface2: #F1F5F9;
+
+  /* Nav bar */
+  --nav-bg: #1d4288;
+  --nav-border: rgba(255, 255, 255, 0.08);
+
+  /* Borders */
+  --border: #D1DAE5;
+
+  /* Semantic colors */
+  --green: #10B981;
+  --orange: #F59E0B;
+  --rose: #EF4444;
+  --purple: #8B5CF6;
+  --blue: #0067FF;
+
+  --green-bg: rgba(16, 185, 129, 0.10);
+  --blue-bg: rgba(0, 103, 255, 0.08);
+  --orange-bg: rgba(245, 158, 11, 0.10);
+  --purple-bg: rgba(139, 92, 246, 0.10);
+  --rose-bg: rgba(239, 68, 68, 0.10);
+
+  /* Radius — wfmamerica.org uses small radii */
+  --radius: 6px;
+  --radius-sm: 4px;
+  --radius-pill: 50px;
+
+  /* Shadows — very subtle per wfmamerica.org */
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0px 2px 8px 0px rgba(0, 0, 0, 0.08);
+
+  /* Layout */
+  --nav-height: 72px;
+  --transition: all 0.2s ease;
+}

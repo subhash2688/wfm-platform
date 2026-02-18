@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V1 — Current (Centered Hero + 2x2 Grid)</title>
+  <link rel="stylesheet" href="../static/css/variables.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Karla:wght@400;500;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Karla', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+    h1,h2,h3 { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 600; }
+    a { color: var(--primary); text-decoration: none; }
+
+    .app-layout { display: flex; flex-direction: column; height: 100vh; }
+
+    /* Nav */
+    .top-nav { height: 72px; min-height: 72px; background: var(--nav-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 36px; }
+    .nav-left { display: flex; align-items: center; }
+    .nav-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: #fff; }
+    .nav-brand-name { font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.02em; }
+    .nav-brand-divider { width: 1px; height: 22px; background: rgba(255,255,255,0.18); }
+    .nav-center { display: flex; align-items: center; gap: 4px; }
+    .nav-tab { padding: 8px 22px; border-radius: 8px; font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.55); text-decoration: none; transition: all 0.2s; }
+    .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.10); }
+    .nav-tab.active { color: #fff; background: rgba(255,255,255,0.14); font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-btn { padding: 9px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; font-family: 'Karla', sans-serif; }
+    .nav-btn-outline { background: transparent; color: rgba(255,255,255,0.65); border: 1.5px solid rgba(255,255,255,0.2); }
+    .nav-btn-dark { background: var(--primary); color: #fff; }
+    .nav-settings { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px; color: rgba(255,255,255,0.45); text-decoration: none; }
+    .version-tag { position: fixed; top: 80px; right: 20px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 20px; z-index: 99; letter-spacing: 0.04em; }
+
+    .main-content { flex: 1; overflow-y: auto; padding: 40px 64px; background: var(--bg); }
+
+    /* Home hero */
+    .home-hero { max-width: 1060px; margin: 0 auto; padding: 56px 0 44px; text-align: center; }
+    .home-heading { font-size: 56px; font-weight: 700; letter-spacing: -0.035em; line-height: 1.1; margin-bottom: 20px; max-width: 700px; margin-left: auto; margin-right: auto; }
+    .home-heading em { font-style: italic; color: var(--primary); }
+    .home-subtitle { font-size: 18px; line-height: 1.7; color: var(--text-dim); max-width: 540px; margin: 0 auto 40px; }
+
+    /* Stats row */
+    .home-stats { display: flex; justify-content: center; gap: 48px; padding: 28px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); max-width: 780px; margin: 0 auto; }
+    .home-stat { text-align: center; }
+    .home-stat-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: 38px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+    .home-stat-num.blue { color: var(--primary); }
+    .home-stat-num.orange { color: var(--orange); }
+    .home-stat-num.rose { color: var(--rose); }
+    .home-stat-num.green { color: var(--green); }
+    .home-stat-num.purple { color: var(--purple); }
+    .home-stat-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+    /* Workspace cards */
+    .home-workspace { max-width: 1060px; margin: 0 auto; padding: 40px 0 44px; }
+    .home-ws-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 14px; }
+    .home-ws-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .home-ws-card { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; cursor: pointer; transition: all 0.22s ease; text-decoration: none; color: inherit; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+    .home-ws-card:hover { border-color: var(--primary); box-shadow: 0 6px 24px rgba(0,103,255,0.08); transform: translateY(-2px); text-decoration: none; color: inherit; }
+    .home-ws-head { padding: 24px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; }
+    .home-ws-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .home-ws-stat { text-align: right; }
+    .home-ws-num { font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+    .home-ws-num.blue { color: var(--primary); } .home-ws-num.orange { color: var(--orange); } .home-ws-num.rose { color: var(--rose); } .home-ws-num.green { color: var(--green); }
+    .home-ws-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+    .home-ws-body { padding: 14px 24px 10px; }
+    .home-ws-body h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .home-ws-body p { font-size: 13px; line-height: 1.55; color: var(--text-dim); margin: 0; }
+    .home-ws-chips { padding: 4px 24px 22px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .home-ws-chip { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; background: var(--surface2); color: var(--text-dim); border: 1px solid rgba(0,0,0,0.04); }
+
+    /* Shared */
+    .blue-bg { background: rgba(0,103,255,0.08); } .orange-bg { background: rgba(245,158,11,0.10); } .rose-bg { background: rgba(239,68,68,0.10); } .green-bg { background: rgba(16,185,129,0.10); }
+
+    .home-footer { max-width: 1060px; margin: 0 auto; padding: 8px 0 48px; text-align: center; }
+    .home-footer p { font-size: 12px; color: var(--text-muted); }
+    .home-footer strong { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <nav class="top-nav">
+      <div class="nav-left">
+        <a href="#" class="nav-brand">
+          <span class="nav-brand-name">Rally</span>
+          <span class="nav-brand-divider"></span>
+          <span style="color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500;">WFM</span>
+        </a>
+      </div>
+      <div class="nav-center">
+        <a href="#" class="nav-tab active">Home</a>
+        <a href="#" class="nav-tab">Shifts</a>
+        <a href="#" class="nav-tab">Volunteers</a>
+        <a href="#" class="nav-tab">Gaps</a>
+      </div>
+      <div class="nav-right">
+        <a href="#" class="nav-btn nav-btn-outline">Export</a>
+        <a href="#" class="nav-btn nav-btn-dark">+ New Shift</a>
+        <a href="#" class="nav-settings">&#9881;</a>
+      </div>
+    </nav>
+
+    <div class="version-tag">V1 &mdash; CURRENT: Centered Hero + 2x2 Grid</div>
+
+    <main class="main-content">
+      <!-- Hero centered -->
+      <div class="home-hero">
+        <h1 class="home-heading">
+          Organize the team.<br>
+          Fill the gaps.<br>
+          <em>Serve the students.</em>
+        </h1>
+        <p class="home-subtitle">
+          Your workspace for coordinating volunteers across three campuses — from shift scheduling to day-of check-ins.
+        </p>
+        <div class="home-stats">
+          <div class="home-stat">
+            <div class="home-stat-num blue">14</div>
+            <div class="home-stat-label">Active volunteers</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-num orange">10</div>
+            <div class="home-stat-label">Upcoming shifts</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-num rose">6</div>
+            <div class="home-stat-label">Gaps to fill</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-num green">84</div>
+            <div class="home-stat-label">Volunteer hours</div>
+          </div>
+          <div class="home-stat">
+            <div class="home-stat-num purple">5</div>
+            <div class="home-stat-label">Shifts completed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2x2 workspace cards -->
+      <div class="home-workspace">
+        <div class="home-ws-label">Your workspace</div>
+        <div class="home-ws-grid">
+          <a href="#" class="home-ws-card">
+            <div class="home-ws-head">
+              <div class="home-ws-icon blue-bg">&#128197;</div>
+              <div class="home-ws-stat"><div class="home-ws-num blue">10</div><div class="home-ws-sub">Upcoming</div></div>
+            </div>
+            <div class="home-ws-body"><h3>Shifts</h3><p>View, create, and manage shifts across all three campuses. See who's signed up and where help is needed.</p></div>
+            <div class="home-ws-chips"><span class="home-ws-chip">Create a shift</span><span class="home-ws-chip">This week</span><span class="home-ws-chip">By campus</span></div>
+          </a>
+          <a href="#" class="home-ws-card">
+            <div class="home-ws-head">
+              <div class="home-ws-icon orange-bg">&#128101;</div>
+              <div class="home-ws-stat"><div class="home-ws-num orange">20</div><div class="home-ws-sub">Registered</div></div>
+            </div>
+            <div class="home-ws-body"><h3>Volunteers</h3><p>Browse the volunteer roster, check stats, and add new team members. Export the full list as CSV anytime.</p></div>
+            <div class="home-ws-chips"><span class="home-ws-chip">Add volunteer</span><span class="home-ws-chip">Roster stats</span><span class="home-ws-chip">Export CSV</span></div>
+          </a>
+          <a href="#" class="home-ws-card">
+            <div class="home-ws-head">
+              <div class="home-ws-icon rose-bg">&#9888;</div>
+              <div class="home-ws-stat"><div class="home-ws-num rose">6</div><div class="home-ws-sub">Unfilled</div></div>
+            </div>
+            <div class="home-ws-body"><h3>Gaps</h3><p>See which upcoming shifts still need volunteers. Get smart suggestions ranked by campus, availability, and reliability.</p></div>
+            <div class="home-ws-chips"><span class="home-ws-chip">View gaps</span><span class="home-ws-chip">Auto-suggest</span><span class="home-ws-chip">Quick assign</span></div>
+          </a>
+          <a href="#" class="home-ws-card">
+            <div class="home-ws-head">
+              <div class="home-ws-icon green-bg">&#9881;</div>
+              <div class="home-ws-stat"><div class="home-ws-num green">43</div><div class="home-ws-sub">Signups</div></div>
+            </div>
+            <div class="home-ws-body"><h3>Settings</h3><p>Database stats, seed demo data, export roster, and reset when needed. Your admin control panel.</p></div>
+            <div class="home-ws-chips"><span class="home-ws-chip">DB overview</span><span class="home-ws-chip">Seed data</span><span class="home-ws-chip">Reset</span></div>
+          </a>
+        </div>
+      </div>
+
+      <div class="home-footer">
+        <p><strong>Rally</strong> by World Food Movement &middot; Coordinating the volunteers who feed the students</p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

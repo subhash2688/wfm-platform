@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rally — Verify Code</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+</head>
+<body class="vol-auth-page">
+  <div class="vol-auth-container">
+    <div class="vol-auth-brand">
+      <img src="{{ url_for('static', filename='img/wfm-logo-white.png') }}" alt="WFM" class="vol-auth-logo">
+      <h1 class="vol-auth-title">Rally</h1>
+      <p class="vol-auth-subtitle">Enter your verification code</p>
+    </div>
+
+    {% if dev_code %}
+    <div class="vol-dev-banner">
+      Dev mode &mdash; Your code is: <strong>{{ dev_code }}</strong>
+    </div>
+    {% endif %}
+
+    <div class="vol-auth-card">
+      {% if error %}
+      <div class="vol-alert vol-alert-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('volunteer.verify_post') }}" id="otpForm">
+        <label class="vol-label">Verification code</label>
+        <div class="vol-otp-group">
+          <input type="text" name="d1" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input" autofocus>
+          <input type="text" name="d2" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input">
+          <input type="text" name="d3" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input">
+          <input type="text" name="d4" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input">
+          <input type="text" name="d5" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input">
+          <input type="text" name="d6" maxlength="1" inputmode="numeric" pattern="[0-9]" class="vol-otp-input">
+        </div>
+        <button type="submit" class="vol-btn vol-btn-primary">Verify</button>
+      </form>
+
+      <p class="vol-auth-link"><a href="{{ url_for('volunteer.login') }}">Use a different number</a></p>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var inputs = document.querySelectorAll('.vol-otp-input');
+    inputs.forEach(function(inp, i) {
+      inp.addEventListener('input', function() {
+        if (inp.value.length === 1 && i < inputs.length - 1) {
+          inputs[i + 1].focus();
+        }
+        // Auto-submit on last digit
+        if (i === inputs.length - 1 && inp.value.length === 1) {
+          document.getElementById('otpForm').submit();
+        }
+      });
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && inp.value === '' && i > 0) {
+          inputs[i - 1].focus();
+        }
+      });
+      // Allow paste of full code
+      inp.addEventListener('paste', function(e) {
+        e.preventDefault();
+        var data = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+        for (var j = 0; j < Math.min(data.length, inputs.length); j++) {
+          inputs[j].value = data[j];
+        }
+        if (data.length >= inputs.length) {
+          document.getElementById('otpForm').submit();
+        } else if (data.length > 0) {
+          inputs[Math.min(data.length, inputs.length - 1)].focus();
+        }
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

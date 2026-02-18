@@ -1,0 +1,93 @@
+<div class="card mb-16" style="cursor: default; border-left: 4px solid {{ 'var(--green)' if d.priority == 'High' else ('var(--primary)' if d.priority == 'Medium' else 'var(--border)') }};">
+  <!-- Header row -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+    <div>
+      <h3 style="font-size: 16px; margin-bottom: 4px;">{{ d.company_name }}</h3>
+      <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 0;">{{ d.program_name }}</p>
+    </div>
+    <div style="display: flex; gap: 6px; align-items: center; flex-shrink: 0;">
+      <span class="badge badge-{{ 'green' if d.grant_type == 'Cash' else ('purple' if 'In-Kind' in (d.grant_type or '') else 'blue') }}">{{ d.grant_type or 'Cash' }}</span>
+      <select data-id="{{ d.id }}" onchange="updateDeadlineStatus({{ d.id }}, this.value)" style="background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); font-size: 11px; padding: 4px 8px; border-radius: 4px;">
+        <option value="Not Started" {{ 'selected' if d.status == 'Not Started' }}>Not Started</option>
+        <option value="Researching" {{ 'selected' if d.status == 'Researching' }}>Researching</option>
+        <option value="LOI Sent" {{ 'selected' if d.status == 'LOI Sent' }}>LOI Sent</option>
+        <option value="In Progress" {{ 'selected' if d.status == 'In Progress' }}>In Progress</option>
+        <option value="Submitted" {{ 'selected' if d.status == 'Submitted' }}>Submitted</option>
+        <option value="Awarded" {{ 'selected' if d.status == 'Awarded' }}>Awarded</option>
+        <option value="Declined" {{ 'selected' if d.status == 'Declined' }}>Declined</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Quick info bar -->
+  <div style="display: flex; gap: 20px; flex-wrap: wrap; font-size: 13px; color: var(--text-dim); margin-bottom: 16px; padding: 10px 14px; background: var(--primary-light); border-radius: 6px;">
+    {% if d.award_range %}<span><strong>Award:</strong> {{ d.award_range }}</span>{% endif %}
+    {% if d.deadline %}<span><strong>Deadline:</strong> {{ d.deadline }}</span>{% endif %}
+    {% if d.cycle %}<span><strong>Cycle:</strong> {{ d.cycle }}</span>{% endif %}
+    {% if d.geographic_focus %}<span><strong>Geo:</strong> {{ d.geographic_focus }}</span>{% endif %}
+  </div>
+
+  <!-- Focus area -->
+  {% if d.focus_area %}
+  <div style="margin-bottom: 12px;">
+    <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">What They Fund</span>
+    <p style="font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.6;">{{ d.focus_area }}</p>
+  </div>
+  {% endif %}
+
+  <!-- Expand toggle -->
+  <button class="btn btn-ghost btn-sm" onclick="toggleGrantDetail({{ d.id }})" id="grantToggle-{{ d.id }}">Show Application Details</button>
+
+  <!-- Expandable details -->
+  <div id="grantDetail-{{ d.id }}" style="display: none; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+    <div class="two-col">
+      <!-- Left: eligibility + process -->
+      <div>
+        {% if d.eligibility %}
+        <div style="margin-bottom: 16px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">Eligibility</span>
+          <p style="font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.65;">{{ d.eligibility }}</p>
+        </div>
+        {% endif %}
+
+        {% if d.application_process %}
+        <div style="margin-bottom: 16px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">How to Apply</span>
+          <div style="font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.8; white-space: pre-line;">{{ d.application_process }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Right: documents + contact -->
+      <div>
+        {% if d.required_documents %}
+        <div style="margin-bottom: 16px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">Required Documents</span>
+          <div style="font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.8; white-space: pre-line;">{{ d.required_documents }}</div>
+        </div>
+        {% endif %}
+
+        {% if d.contact_info %}
+        <div style="margin-bottom: 16px;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);">Contact</span>
+          <p style="font-size: 13px; color: var(--primary); margin-top: 4px; line-height: 1.6;">{{ d.contact_info }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if d.notes %}
+    <div style="padding: 12px 16px; background: var(--orange-bg); border-radius: 6px; font-size: 13px; color: var(--orange); line-height: 1.6; margin-top: 8px;">
+      <strong>Strategy Note:</strong> {{ d.notes }}
+    </div>
+    {% endif %}
+
+    <!-- Action links -->
+    <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+      {% if d.application_url %}
+      <a href="{{ d.application_url }}" target="_blank" class="btn btn-primary btn-sm">Apply / Visit Website &rarr;</a>
+      {% endif %}
+      <button class="btn btn-ghost btn-sm" onclick="deleteDeadline({{ d.id }})" style="color: var(--rose); border-color: var(--rose);">Delete</button>
+    </div>
+  </div>
+</div>

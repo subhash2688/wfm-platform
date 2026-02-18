@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+env/
+.venv/
+
+# Databases (runtime data — not source code)
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (volunteer photos)
+rally/static/uploads/
+
+# Environment / secrets
+.env
+.env.*
+*.env
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+/tmp/
+
+# Excel / Office temp files
+~$*
+
+# Data directory (SQLite DBs live here)
+cultivate/data/
+rally/data/
+
+# Older project folders (separate git repos)
+Corporate Giving/
+Volunteer_Mgmt/

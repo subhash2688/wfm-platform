@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Rally — WFM Volunteer Management{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <div class="nav-left">
+        <a href="/" class="nav-brand">
+          <img src="{{ url_for('static', filename='img/prabhupada-portrait.jpg') }}" alt="" class="nav-avatar">
+          <span class="nav-brand-name">Rally</span>
+          <span class="nav-brand-divider"></span>
+          <img src="{{ url_for('static', filename='img/wfm-logo-white.png') }}" alt="World Food Movement" class="nav-logo-img">
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <a href="/" class="nav-tab {{ 'active' if active_page == 'home' }}">Home</a>
+        <a href="/shifts" class="nav-tab {{ 'active' if active_page == 'shifts' }}">Shifts</a>
+        <a href="/volunteers" class="nav-tab {{ 'active' if active_page == 'volunteers' }}">Volunteers</a>
+        <a href="/gaps" class="nav-tab {{ 'active' if active_page == 'gaps' }}">
+          Gaps
+          {% if gap_count is defined and gap_count > 0 %}<span class="nav-tab-dot"></span>{% endif %}
+        </a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/api/export/csv" class="nav-btn nav-btn-outline">Export</a>
+        <a href="/shifts" class="nav-btn nav-btn-dark" onclick="event.preventDefault(); window.location='/shifts'; setTimeout(function(){var f=document.getElementById('createShiftForm'); if(f) f.style.display='';},300);">+ New Shift</a>
+        <a href="/v/" class="nav-btn nav-btn-outline" target="_blank" title="Open volunteer mobile app" style="font-size:12px;">Volunteer App</a>
+        <a href="/settings" class="nav-settings {{ 'active' if active_page == 'settings' }}" title="Settings">
+          &#9881;
+        </a>
+        <!-- Module switcher -->
+        <select class="nav-btn nav-btn-outline" style="cursor:pointer; font-size:13px; padding:7px 12px; background:transparent; color:rgba(255,255,255,0.65); border:1.5px solid rgba(255,255,255,0.2); border-radius:8px;" onchange="if(this.value) window.location=this.value;" aria-label="Switch module">
+          <option value="" selected disabled style="color:#333;">Switch module</option>
+          <option value="http://localhost:5001" style="color:#333;">Cultivate</option>
+          <option value="http://localhost:5002" style="color:#333;">Rally</option>
+        </select>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <div class="page-enter">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

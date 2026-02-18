@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% block title %}Intelligence — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Intelligence</div>
+  <h1>Foundation Intelligence</h1>
+  <p class="page-subtitle">What foundations give, how much, who got it, and what causes excite them.</p>
+</div>
+
+<!-- Stat bar -->
+<div class="stat-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="stat-card blue" title="Total assets held by all tracked foundations combined (from latest 990 filings)">
+    <div class="stat-value">{{ fmt_m(total_assets) }}</div>
+    <div class="stat-label">Combined Assets</div>
+  </div>
+  <div class="stat-card green" title="Total grants paid by all tracked foundations in their most recent filing year">
+    <div class="stat-value">{{ fmt_m(total_grants) }}</div>
+    <div class="stat-label">Combined Grants</div>
+  </div>
+  <div class="stat-card purple" title="Number of corporate foundations with 990 data fetched from ProPublica">
+    <div class="stat-value">{{ foundation_count }}</div>
+    <div class="stat-label">Foundations Tracked</div>
+  </div>
+  <div class="stat-card orange" title="Average grants paid per foundation (Combined Grants / Foundations Tracked)">
+    <div class="stat-value">{{ fmt_m(avg_grant) }}</div>
+    <div class="stat-label">Avg Grant / Foundation</div>
+  </div>
+</div>
+
+<!-- Top 5 Priority Targets -->
+<h2 class="section-header">Top 5 Priority Targets</h2>
+<div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+  {% for item in top5 %}
+  <div class="target-card">
+    <div class="target-rank">#{{ loop.index }}</div>
+    <h3><a href="/company/{{ item.prospect.id }}">{{ item.prospect.company_name }}</a></h3>
+    <div class="target-foundation">
+      {% if item.foundation %}
+        {{ item.foundation.foundation_name }} &middot; Score: {{ item.prospect.total_score }}/15
+      {% else %}
+        No foundation data &middot; Score: {{ item.prospect.total_score }}/15
+      {% endif %}
+    </div>
+
+    <div class="target-stats">
+      <div class="target-stat" title="Total grants paid by the foundation (from 990 filing)">
+        <div class="val">{{ item.grants_paid }}</div>
+        <div class="lbl">Grants</div>
+      </div>
+      <div class="target-stat" title="Alignment (1-5): Mission match to WFM. 5=food/hunger, 4=education/health, 3=broad social impact">
+        <div class="val">{{ item.prospect.alignment_score or 0 }}</div>
+        <div class="lbl">Align</div>
+      </div>
+      <div class="target-stat" title="Proximity (1-5): Distance to WFM campuses. 5=same city, 4=within 10mi, 3=within 25mi">
+        <div class="val">{{ item.prospect.proximity_score or 0 }}</div>
+        <div class="lbl">Prox</div>
+      </div>
+      <div class="target-stat" title="Capacity (1-5): Giving program size. 5=$10M+/yr, 4=$1-10M/yr, 3=$100K-1M/yr">
+        <div class="val">{{ item.prospect.capacity_score or 0 }}</div>
+        <div class="lbl">Cap</div>
+      </div>
+    </div>
+
+    <div class="target-focus">{{ item.focus }}</div>
+
+    {% if item.contact %}
+    <div class="target-contact">
+      <strong>{{ item.contact.name }}</strong>{% if item.contact.title %} &middot; {{ item.contact.title }}{% endif %}
+      {% if item.contact.email %}<br>{{ item.contact.email }}{% endif %}
+    </div>
+    {% elif item.prospect.contact_name %}
+    <div class="target-contact">
+      <strong>{{ item.prospect.contact_name }}</strong>{% if item.prospect.contact_title %} &middot; {{ item.prospect.contact_title }}{% endif %}
+      {% if item.prospect.contact_email %}<br>{{ item.prospect.contact_email }}{% endif %}
+    </div>
+    {% endif %}
+
+    <a href="/actions?prepare={{ item.prospect.id }}" class="btn btn-sm btn-primary">Prepare Outreach</a>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Key Insights -->
+{% if insights %}
+<h2 class="section-header">Key Insights</h2>
+{% for insight in insights %}
+<div class="insight-card">
+  <p>{{ insight|safe }}</p>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Cause Heatmap -->
+{% if sorted_areas %}
+<h2 class="section-header">Causes Funded by Foundations</h2>
+<div class="card" style="padding: 24px; margin-bottom: 32px;">
+  {% for area, count in sorted_areas %}
+  <div class="cause-bar-row">
+    <div class="cause-bar-label">{{ area }}</div>
+    <div class="cause-bar-track">
+      <div class="cause-bar-fill {% if 'food' in area|lower or 'hunger' in area|lower %}food{% elif 'education' in area|lower %}education{% elif 'health' in area|lower %}health{% else %}community{% endif %}"
+           style="width: {{ (count / max_area_count * 100)|int }}%">
+        <span>{{ count }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Fit Assessment Summary -->
+{% if fit_counts %}
+<h2 class="section-header">Fit Assessment</h2>
+<p style="font-size: 12px; color: var(--text-muted); margin: -12px 0 12px;">How well each foundation's mission aligns with WFM. <strong>Strong</strong> = mentions food/hunger/nutrition. <strong>Moderate</strong> = mentions education/community/health/youth. <strong>Weak</strong> = no relevant keywords found.</p>
+<div class="flex gap-16 mb-32">
+  {% for fit, count in fit_counts.items() %}
+  <div class="stat-card {% if 'Strong' in fit %}green{% elif 'Moderate' in fit %}orange{% else %}rose{% endif %}"
+       title="{% if 'Strong' in fit %}Foundations whose mission or grants mention food, hunger, nutrition, or food security{% elif 'Moderate' in fit %}Foundations whose mission mentions education, community, health, youth, or workforce{% else %}Foundations with no strong keyword match to WFM's mission{% endif %}">
+    <div class="stat-value">{{ count }}</div>
+    <div class="stat-label">{{ fit }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Deep Research Status -->
+<h2 class="section-header">Deep Research Status</h2>
+<p style="font-size: 12px; color: var(--text-muted); margin: -12px 0 12px;">Deep research fetches multi-year 990 XML filings to extract grantee lists, board members, and giving trends. Growing/Stable/Declining compares early vs. recent grant amounts (&gt;15% change threshold).</p>
+<div class="flex gap-16 mb-32">
+  <div class="stat-card blue" title="Foundations that have been deep-researched (multi-year financials, XML grantee/officer extraction)">
+    <div class="stat-value">{{ deep_done }}</div>
+    <div class="stat-label">Deep Researched</div>
+  </div>
+  <div class="stat-card orange" title="Foundations with 990 data but not yet deep-researched. Click 'Deep Research All' to process them.">
+    <div class="stat-value">{{ deep_pending }}</div>
+    <div class="stat-label">Pending Research</div>
+  </div>
+  <div class="stat-card green" title="Foundations where recent grants are >15% higher than early grants — giving is increasing">
+    <div class="stat-value">{{ trend_growing }}</div>
+    <div class="stat-label">Growing</div>
+  </div>
+  <div class="stat-card purple" title="Foundations where grants are within 15% of early amounts — giving is steady">
+    <div class="stat-value">{{ trend_stable }}</div>
+    <div class="stat-label">Stable</div>
+  </div>
+  <div class="stat-card rose" title="Foundations where recent grants are >15% lower than early grants — giving is decreasing">
+    <div class="stat-value">{{ trend_declining }}</div>
+    <div class="stat-label">Declining</div>
+  </div>
+</div>
+
+<!-- Grantee Category Distribution (from Schedule I data) -->
+{% if sorted_categories %}
+<h2 class="section-header">Where Foundation Grants Go (Schedule I Analysis)</h2>
+<div class="card" style="padding: 24px; margin-bottom: 32px;">
+  {% for cat, amount in sorted_categories %}
+  <div class="cause-bar-row">
+    <div class="cause-bar-label">{{ cat | replace('_', ' ') | title }}</div>
+    <div class="cause-bar-track">
+      <div class="cause-bar-fill {% if 'food' in cat %}food{% elif 'education' in cat %}education{% elif 'health' in cat %}health{% else %}community{% endif %}"
+           style="width: {{ (amount / max_cat_amount * 100)|int }}%">
+        <span>${{ "{:,.0f}".format(amount) }}</span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Foundation Explorer -->
+<div class="flex-between mb-16">
+  <h2 class="section-header" style="margin-bottom: 0;">Foundation Explorer</h2>
+  <div class="flex gap-8">
+    <input type="text" id="foundationSearch" placeholder="Search foundations..." class="filter-bar"
+           style="padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: Karla, sans-serif; background: var(--surface);">
+    <button class="btn btn-sm btn-secondary" onclick="fetchAll990()">Fetch All 990s</button>
+    <button class="btn btn-sm btn-primary" onclick="deepResearchAll()">Deep Research All</button>
+  </div>
+</div>
+
+{% for f in foundations %}
+<div class="foundation-card" data-name="{{ f.foundation_name|lower }}">
+  <div class="foundation-header">
+    <div>
+      <div class="foundation-name">{{ f.foundation_name }}</div>
+      <div style="font-size: 12px; color: var(--text-muted);">
+        EIN: {{ f.ein }} &middot; {{ f.tax_period or 'N/A' }}
+        {% if f.fit_assessment %}
+        &middot; <span class="badge {% if 'Strong' in f.fit_assessment %}badge-green{% elif 'Moderate' in f.fit_assessment %}badge-orange{% else %}badge-rose{% endif %}"
+                       title="{% if 'Strong' in f.fit_assessment %}Mission/grants mention food, hunger, nutrition{% elif 'Moderate' in f.fit_assessment %}Mission/grants mention education, community, health, youth{% else %}No strong WFM mission keywords found{% endif %}">{{ f.fit_assessment }}</span>
+        {% endif %}
+        {% if f.giving_trend %}
+        &middot; <span class="badge {% if f.giving_trend == 'growing' %}badge-green{% elif f.giving_trend == 'stable' %}badge-blue{% else %}badge-rose{% endif %}">{{ f.giving_trend | title }}</span>
+        {% endif %}
+        {% if f.deep_research_at %}
+        <span class="deep-research-status done">Researched</span>
+        {% endif %}
+      </div>
+    </div>
+    <button class="btn-icon" onclick="this.closest('.foundation-card').querySelector('.fdn-details').classList.toggle('hidden')" title="Expand">&#9660;</button>
+  </div>
+
+  <div class="foundation-stats">
+    <div class="foundation-stat">
+      <div class="stat-value">{{ fmt_m(f.total_assets) }}</div>
+      <div class="stat-label">Assets</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value">{{ fmt_m(f.total_grants_paid) }}</div>
+      <div class="stat-label">Grants Paid</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value">{{ fmt_m(f.total_revenue) }}</div>
+      <div class="stat-label">Revenue</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value">{{ fmt_m(f.average_grant_size) }}</div>
+      <div class="stat-label">Avg Grant</div>
+    </div>
+  </div>
+
+  <!-- Expandable details -->
+  <div class="fdn-details hidden" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+    {% if f.mission_statement %}
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 12px;"><strong>Mission:</strong> {{ f.mission_statement }}</p>
+    {% endif %}
+
+    {% if f._parsed_areas %}
+    <div style="margin-bottom: 12px;">
+      {% for area in f._parsed_areas %}
+      <span class="badge badge-blue" style="margin-right: 4px; margin-bottom: 4px;">{{ area }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="info-grid" style="margin-bottom: 12px;">
+      <div class="info-item">
+        <div class="info-label">Grants to Orgs</div>
+        <div class="info-value">{{ fmt_currency(f.grants_to_orgs) }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Contributions Received</div>
+        <div class="info-value">{{ fmt_currency(f.contributions_received) }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Filing Type</div>
+        <div class="info-value">{{ f.filing_type or 'N/A' }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Location</div>
+        <div class="info-value">{{ f.foundation_city or 'N/A' }}, {{ f.foundation_state or '' }}</div>
+      </div>
+    </div>
+
+    {% if f.mission_overlap_score or f.bay_area_grant_pct %}
+    <div class="info-grid mb-16" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="info-item">
+        <div class="info-label">Mission Overlap</div>
+        <div class="info-value">{{ "%.1f"|format(f.mission_overlap_score or 0) }}%</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Bay Area Grants</div>
+        <div class="info-value">{{ "%.1f"|format(f.bay_area_grant_pct or 0) }}%</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">Years of Data</div>
+        <div class="info-value">{{ f.years_of_data or 0 }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="flex gap-8">
+      {% if f.pdf_url %}
+      <a href="{{ f.pdf_url }}" target="_blank" class="btn btn-sm btn-ghost">View 990 PDF</a>
+      {% endif %}
+      {% if f.foundation_url %}
+      <a href="{{ f.foundation_url }}" target="_blank" class="btn btn-sm btn-ghost">Foundation Website</a>
+      {% endif %}
+      {% if f.ein %}
+      <a href="https://projects.propublica.org/nonprofits/organizations/{{ f.ein|replace('-', '') }}" target="_blank" class="btn btn-sm btn-ghost">ProPublica</a>
+      {% endif %}
+      <button class="btn btn-sm btn-secondary" onclick="deepResearch({{ f.prospect_id }})">
+        {% if f.deep_research_at %}Re-run{% else %}Run{% endif %} Deep Research
+      </button>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+{% if missing_foundations %}
+<h2 class="section-header mt-24">Prospects Without 990 Data ({{ missing_foundations|length }})</h2>
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Foundation Name</th>
+        <th>Score</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in missing_foundations %}
+      <tr>
+        <td><a href="/company/{{ p.id }}" class="company-link">{{ p.company_name }}</a></td>
+        <td>{{ p.foundation_name or '—' }}</td>
+        <td>{{ p.total_score or 0 }}</td>
+        <td><button class="btn btn-sm btn-ghost" onclick="fetch990({{ p.id }})">Fetch 990</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/intelligence.js') }}"></script>
+{% endblock %}

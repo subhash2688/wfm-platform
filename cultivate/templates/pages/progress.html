@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Progress — Cultivate{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Progress</div>
+  <h1>Pipeline Progress</h1>
+  <p class="page-subtitle">How you're doing vs your planned actions. {{ stats.total }} prospects in the pipeline.</p>
+</div>
+
+<!-- Scorecard -->
+<div class="scorecard-grid">
+  <div class="stat-card blue">
+    <div class="stat-value">{{ stats.total }}</div>
+    <div class="stat-label">Total Prospects</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">{{ stats.outreach_sent }}</div>
+    <div class="stat-label">Outreach Sent</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-value">{{ stats.meetings }}</div>
+    <div class="stat-label">Meetings</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-value">{{ stats.proposals }}</div>
+    <div class="stat-label">Proposals</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ stats.funded }}</div>
+    <div class="stat-label">Funded</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">${{ '{:,.0f}'.format(stats.total_received) }}</div>
+    <div class="stat-label">$ Raised</div>
+  </div>
+</div>
+
+<!-- Weekly Goals -->
+<h2 class="section-header">Weekly Goals ({{ week_start.strftime('%b %d') }})</h2>
+<div class="card mb-32" style="padding: 24px;">
+  {% for g in weekly_goals %}
+  <div class="goal-row">
+    <div class="goal-label">{{ g.label }}</div>
+    <div class="goal-bar">
+      <div class="goal-bar-fill {% if g.pct >= 100 %}complete{% endif %}" style="width: {{ g.pct }}%"></div>
+    </div>
+    <div class="goal-numbers">
+      {{ g.actual }} / {{ g.target }}
+      {% if g.id %}
+      <button class="btn-icon" style="width: 22px; height: 22px; font-size: 14px; margin-left: 4px;" onclick="incrementGoal({{ g.id }})" title="+1">+</button>
+      {% else %}
+      <button class="btn-icon" style="width: 22px; height: 22px; font-size: 14px; margin-left: 4px;" onclick="createGoal('{{ g.category }}')" title="Start tracking">+</button>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pipeline Funnel -->
+<h2 class="section-header">Pipeline Funnel</h2>
+<div class="funnel">
+  {% for step in funnel %}
+  <div class="funnel-step {% if step.count > 0 %}active-stage{% endif %}">
+    <div class="funnel-count">{{ step.count }}</div>
+    <div class="funnel-label">{{ step.label }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Activity Timeline -->
+{% if activities %}
+<h2 class="section-header">Recent Activity</h2>
+<div class="card mb-32" style="padding: 24px;">
+  <div class="timeline">
+    {% for a in activities %}
+    <div class="timeline-item">
+      <div class="timeline-text">{{ a.description }}</div>
+      <div class="timeline-time">{{ a.timestamp.strftime('%b %d, %H:%M') if a.timestamp else '' }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/progress.js') }}"></script>
+{% endblock %}

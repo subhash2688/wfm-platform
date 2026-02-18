@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultivate — WFM Corporate Fundraising</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --bg-warm: #FAF9F6;
+    --bg-tint: #F4F2EE;
+    --border: #E5E2DC;
+    --border-light: #EDEBE6;
+    --text: #1C1917;
+    --text-2: #57534E;
+    --text-3: #A8A29E;
+    --forest: #1B4332;
+    --forest-mid: #2D6A4F;
+    --forest-light: #40916C;
+    --forest-pale: #EDF5F0;
+    --terracotta: #C2410C;
+    --terracotta-pale: #FEF2E8;
+    --gold: #A16207;
+    --gold-pale: #FEF9EC;
+    --indigo: #3730A3;
+    --indigo-pale: #EEF2FF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-light);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+  }
+
+  .n-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .n-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .n-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--forest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .n-icon svg { width: 16px; height: 16px; }
+
+  .n-brand h1 {
+    font-family: 'Newsreader', serif;
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .n-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  .n-org {
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
+  .n-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2px;
+  }
+
+  .n-tab {
+    padding: 8px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-3);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .n-tab:hover { color: var(--text-2); background: var(--bg-warm); }
+
+  .n-tab.active {
+    color: var(--forest);
+    background: var(--forest-pale);
+  }
+
+  .n-tab .n-pip {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--terracotta);
+    position: absolute;
+    top: 7px;
+    right: 8px;
+  }
+
+  .n-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .n-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .n-btn-outline {
+    background: var(--bg);
+    color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+
+  .n-btn-outline:hover { border-color: var(--text-3); }
+
+  .n-btn-fill {
+    background: var(--forest);
+    color: white;
+  }
+
+  .n-btn-fill:hover { background: var(--forest-mid); }
+
+  /* ---- HERO ---- */
+  .hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+
+  .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: var(--forest-pale);
+    border: 1px solid rgba(45,106,79,0.12);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--forest-mid);
+    margin-bottom: 28px;
+  }
+
+  .hero-chip .hc-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--forest-light);
+    animation: blink 2.5s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .hero h2 {
+    font-family: 'Newsreader', serif;
+    font-size: 56px;
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    margin-bottom: 20px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero h2 .highlight {
+    background: linear-gradient(120deg, var(--forest-pale) 0%, rgba(64,145,108,0.15) 100%);
+    padding: 0 6px;
+    border-radius: 4px;
+  }
+
+  .hero h2 em {
+    font-style: italic;
+    color: var(--forest-mid);
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--text-2);
+    max-width: 540px;
+    margin: 0 auto 40px;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    padding: 28px 0;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 60px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Newsreader', serif;
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+
+  /* ---- CAMPUSES ---- */
+  .campuses {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+  }
+
+  .campuses-inner {
+    background: var(--bg-warm);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .campuses-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .campus-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .campus-items {
+    display: flex;
+    gap: 24px;
+    flex: 1;
+  }
+
+  .campus-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .campus-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .campus-info {}
+
+  .campus-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .campus-meta {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 1px;
+  }
+
+  .campus-count {
+    font-weight: 600;
+    color: var(--forest-mid);
+  }
+
+  /* ---- WORKSPACE ---- */
+  .workspace {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+  }
+
+  .ws-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .ws-header h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+
+  .ws-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .ws-card {
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: var(--bg);
+  }
+
+  .ws-card:hover {
+    border-color: var(--border);
+    box-shadow: 0 8px 40px rgba(28,25,23,0.05);
+    transform: translateY(-3px);
+  }
+
+  .ws-card-head {
+    padding: 28px 28px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .ws-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ws-card-icon svg { width: 22px; height: 22px; }
+
+  .ws-card-stat {
+    text-align: right;
+  }
+
+  .ws-card-stat .big {
+    font-family: 'Newsreader', serif;
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .ws-card-stat .sub {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-3);
+    margin-top: 2px;
+    font-weight: 600;
+  }
+
+  .ws-card-body {
+    padding: 16px 28px 20px;
+  }
+
+  .ws-card-body h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .ws-card-body p {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+
+  .ws-card-foot {
+    padding: 0 28px 24px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .ws-chip {
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    background: var(--bg-warm);
+    color: var(--text-2);
+    border: 1px solid var(--border-light);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .ws-chip:hover {
+    border-color: var(--border);
+    color: var(--text);
+    background: var(--bg-tint);
+  }
+
+  /* ---- ACTIVITY ---- */
+  .activity {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 100px;
+  }
+
+  .act-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .act-head h3 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+
+  .act-head a {
+    font-size: 13px;
+    color: var(--forest-mid);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .act-list {
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .act-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.1s;
+  }
+
+  .act-item:last-child { border-bottom: none; }
+  .act-item:hover { background: var(--bg-warm); }
+
+  .act-marker {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .act-content { flex: 1; }
+
+  .act-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .act-desc {
+    font-size: 12.5px;
+    color: var(--text-3);
+    margin-top: 2px;
+  }
+
+  .act-tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .act-time {
+    font-size: 12px;
+    color: var(--text-3);
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ---- FOOTER ---- */
+  .footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 48px;
+    text-align: center;
+  }
+
+  .footer p {
+    font-size: 12px;
+    color: var(--text-3);
+  }
+
+  .footer strong {
+    color: var(--text-2);
+  }
+
+  @media (max-width: 900px) {
+    .hero h2 { font-size: 40px; }
+    .ws-grid { grid-template-columns: 1fr; }
+    .n-center { display: none; }
+    .stats-row { gap: 24px; flex-wrap: wrap; }
+    .campus-items { flex-direction: column; gap: 12px; }
+    .campuses-inner { flex-direction: column; align-items: flex-start; }
+    .campus-divider { width: 100%; height: 1px; }
+  }
+
+  @media (max-width: 600px) {
+    nav, .hero, .campuses, .workspace, .activity, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h2 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="n-left">
+    <div class="n-brand">
+      <div class="n-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 22c0-8-8-10-8-16a8 8 0 0 1 16 0c0 6-8 8-8 16z"/>
+        </svg>
+      </div>
+      <h1>Cultivate</h1>
+    </div>
+    <div class="n-divider"></div>
+    <span class="n-org">World Food Movement</span>
+  </div>
+  <div class="n-center">
+    <div class="n-tab active">Home</div>
+    <div class="n-tab" style="position:relative">Research<span class="n-pip"></span></div>
+    <div class="n-tab">Outreach</div>
+    <div class="n-tab">Pipeline</div>
+    <div class="n-tab">Progress</div>
+  </div>
+  <div class="n-right">
+    <button class="n-btn n-btn-outline">Export</button>
+    <button class="n-btn n-btn-fill">+ New Prospect</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-chip">
+    <span class="hc-dot"></span>
+    California Chapter · Corporate Fundraising
+  </div>
+  <h2>Find the companies.<br>Build the case.<br><em>Fund the meals.</em></h2>
+  <p class="hero-sub">Cultivate is your workspace for turning corporate generosity into student meals — from prospect research to funded partnership.</p>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num" style="color:var(--forest-mid)">48</div>
+      <div class="stat-label">Prospects</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--gold)">29</div>
+      <div class="stat-label">Foundations analyzed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--indigo)">15</div>
+      <div class="stat-label">Emails drafted</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--terracotta)">0</div>
+      <div class="stat-label">In outreach</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" style="color:var(--text-3)">$0</div>
+      <div class="stat-label">Raised (so far)</div>
+    </div>
+  </div>
+</div>
+
+<div class="campuses">
+  <div class="campuses-inner">
+    <span class="campuses-label">Serving</span>
+    <div class="campus-divider"></div>
+    <div class="campus-items">
+      <div class="campus-item">
+        <div class="campus-marker" style="background:var(--forest-pale)">🏫</div>
+        <div class="campus-info">
+          <div class="campus-name">De Anza College</div>
+          <div class="campus-meta">Cupertino · <span class="campus-count">22 nearby prospects</span></div>
+        </div>
+      </div>
+      <div class="campus-item">
+        <div class="campus-marker" style="background:var(--gold-pale)">🏫</div>
+        <div class="campus-info">
+          <div class="campus-name">Foothill College</div>
+          <div class="campus-meta">Los Altos Hills · <span class="campus-count">18 nearby prospects</span></div>
+        </div>
+      </div>
+      <div class="campus-item">
+        <div class="campus-marker" style="background:var(--indigo-pale)">🏫</div>
+        <div class="campus-info">
+          <div class="campus-name">Chabot College</div>
+          <div class="campus-meta">Hayward · <span class="campus-count">8 nearby prospects</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="workspace">
+  <div class="ws-header"><h3>Your workspace</h3></div>
+  <div class="ws-grid">
+
+    <div class="ws-card">
+      <div class="ws-card-head">
+        <div class="ws-card-icon" style="background:var(--forest-pale)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--forest)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="ws-card-stat">
+          <div class="big" style="color:var(--forest-mid)">29</div>
+          <div class="sub">Analyzed</div>
+        </div>
+      </div>
+      <div class="ws-card-body">
+        <h3>Research</h3>
+        <p>Explore corporate foundations, pull 990 data, and understand what each company actually funds before you reach out.</p>
+      </div>
+      <div class="ws-card-foot">
+        <span class="ws-chip">Analyze a foundation</span>
+        <span class="ws-chip">Search 990 data</span>
+        <span class="ws-chip">Auto-research batch</span>
+      </div>
+    </div>
+
+    <div class="ws-card">
+      <div class="ws-card-head">
+        <div class="ws-card-icon" style="background:var(--gold-pale)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="ws-card-stat">
+          <div class="big" style="color:var(--gold)">38</div>
+          <div class="sub">Pending</div>
+        </div>
+      </div>
+      <div class="ws-card-body">
+        <h3>Outreach</h3>
+        <p>Draft personalized emails, track contacts, manage follow-ups, and apply for open grant opportunities.</p>
+      </div>
+      <div class="ws-card-foot">
+        <span class="ws-chip">Draft an email</span>
+        <span class="ws-chip">Grant deadlines</span>
+        <span class="ws-chip">Follow-up queue</span>
+      </div>
+    </div>
+
+    <div class="ws-card">
+      <div class="ws-card-head">
+        <div class="ws-card-icon" style="background:var(--indigo-pale)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--indigo)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div class="ws-card-stat">
+          <div class="big" style="color:var(--indigo)">48</div>
+          <div class="sub">Tracked</div>
+        </div>
+      </div>
+      <div class="ws-card-body">
+        <h3>Pipeline</h3>
+        <p>Every prospect at a glance — scores, stages, and what needs to happen next to move them forward.</p>
+      </div>
+      <div class="ws-card-foot">
+        <span class="ws-chip">View all prospects</span>
+        <span class="ws-chip">Top 15 priority</span>
+        <span class="ws-chip">Export tracker</span>
+      </div>
+    </div>
+
+    <div class="ws-card">
+      <div class="ws-card-head">
+        <div class="ws-card-icon" style="background:var(--terracotta-pale)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--terracotta)" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="ws-card-stat">
+          <div class="big" style="color:var(--terracotta)">Wk 1</div>
+          <div class="sub">of 12</div>
+        </div>
+      </div>
+      <div class="ws-card-body">
+        <h3>Progress</h3>
+        <p>Track your 90-day launch plan, weekly goals, and watch the pipeline convert into real partnerships.</p>
+      </div>
+      <div class="ws-card-foot">
+        <span class="ws-chip">90-day plan</span>
+        <span class="ws-chip">Weekly scorecard</span>
+        <span class="ws-chip">Conversion metrics</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="activity">
+  <div class="act-head">
+    <h3>Recent activity</h3>
+    <a href="#">View all →</a>
+  </div>
+  <div class="act-list">
+    <div class="act-item">
+      <div class="act-marker" style="background:var(--forest-pale)">🔍</div>
+      <div class="act-content">
+        <div class="act-title">Kaiser Permanente Foundation — 990 analysis complete</div>
+        <div class="act-desc">Alignment: 5/5 · $42M in grants · Funds food security & community health in East Bay</div>
+      </div>
+      <span class="act-tag" style="background:var(--forest-pale);color:var(--forest)">Research</span>
+      <span class="act-time">2m ago</span>
+    </div>
+    <div class="act-item">
+      <div class="act-marker" style="background:var(--forest-pale)">📊</div>
+      <div class="act-content">
+        <div class="act-title">Added 12 new companies · Auto-scored and ranked</div>
+        <div class="act-desc">Tech & healthcare within 15mi of campuses · 4 prospects scored 13+</div>
+      </div>
+      <span class="act-tag" style="background:var(--forest-pale);color:var(--forest)">Research</span>
+      <span class="act-time">38m ago</span>
+    </div>
+    <div class="act-item">
+      <div class="act-marker" style="background:var(--gold-pale)">✉️</div>
+      <div class="act-content">
+        <div class="act-title">Outreach draft ready — Intuit Foundation</div>
+        <div class="act-desc">Personalized for financial empowerment & education focus · Awaiting review</div>
+      </div>
+      <span class="act-tag" style="background:var(--gold-pale);color:var(--gold)">Draft</span>
+      <span class="act-time">1h ago</span>
+    </div>
+    <div class="act-item">
+      <div class="act-marker" style="background:var(--indigo-pale)">🎯</div>
+      <div class="act-content">
+        <div class="act-title">Top 15 priority list generated from scoring</div>
+        <div class="act-desc">Avg alignment: 4.3 · Avg proximity: 4.1 · Ready for outreach wave 1</div>
+      </div>
+      <span class="act-tag" style="background:var(--indigo-pale);color:var(--indigo)">Pipeline</span>
+      <span class="act-time">Yesterday</span>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p><strong>Cultivate</strong> by World Food Movement · Built to fund the meals that keep students in school</p>
+</div>
+
+</body>
+</html>

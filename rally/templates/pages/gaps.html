@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Gaps — Rally{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Gaps</div>
+  <h1>Unfilled Shifts</h1>
+  <p class="page-subtitle">{{ gaps|length }} upcoming shift{{ 's' if gaps|length != 1 else '' }} still need{{ '' if gaps|length != 1 else 's' }} more volunteers. Click "Find Matches" to get ranked suggestions.</p>
+</div>
+
+{% if gaps %}
+<div style="display: flex; flex-direction: column; gap: 16px;">
+  {% for g in gaps %}
+  {% set days_away = g.days_away %}
+  {% set urgency = 'urgent' if days_away <= 2 else ('warning' if days_away <= 7 else 'ok') %}
+  <div class="shift-card {{ 'campus-de-anza' if 'De Anza' in g.shift.campus else ('campus-foothill' if 'Foothill' in g.shift.campus else 'campus-chabot') }}">
+    <div class="shift-header">
+      <div>
+        <span class="shift-campus {{ 'de-anza' if 'De Anza' in g.shift.campus else ('foothill' if 'Foothill' in g.shift.campus else 'chabot') }}">
+          {{ g.shift.campus }}
+        </span>
+        <div class="shift-date">{{ g.shift.date.strftime('%A, %B %d') }}</div>
+        <div class="shift-time">{{ g.shift.start_time.strftime('%I:%M %p') }} – {{ g.shift.end_time.strftime('%I:%M %p') }}</div>
+        <div class="shift-type">{{ g.shift.shift_type }}</div>
+      </div>
+      <div style="text-align: right;">
+        <span class="urgency-badge {{ urgency }}">
+          {% if urgency == 'urgent' %}URGENT{% elif urgency == 'warning' %}{{ days_away }} days{% else %}{{ days_away }} days{% endif %}
+        </span>
+        <div style="margin-top: 8px;">
+          <span class="fill-text {{ 'full' if g.filled >= g.shift.required_count else ('partial' if g.filled >= g.shift.required_count // 2 else 'critical') }}" style="font-size: 18px;">
+            {{ g.filled }}/{{ g.shift.required_count }}
+          </span>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">FILLED</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fill-bar mb-16" style="height: 8px;">
+      <div class="fill-bar-inner {{ 'full' if g.filled >= g.shift.required_count else ('partial' if g.filled >= g.shift.required_count // 2 else 'critical') }}"
+           style="width: {{ (g.filled / g.shift.required_count * 100) if g.shift.required_count > 0 else 0 }}%"></div>
+    </div>
+
+    <div class="flex-between">
+      <span style="font-size: 13px; color: var(--text-dim);">
+        Need <strong>{{ g.shift.required_count - g.filled }}</strong> more volunteer{{ 's' if (g.shift.required_count - g.filled) != 1 else '' }}
+      </span>
+      <div class="flex gap-8">
+        <button class="btn btn-sm btn-secondary" onclick="loadSuggestions({{ g.shift.id }})">Find Matches</button>
+        <a href="/shifts/{{ g.shift.id }}" class="btn btn-sm btn-ghost">View Shift</a>
+      </div>
+    </div>
+
+    <!-- Suggestions container (loaded via AJAX) -->
+    <div id="suggestions-{{ g.shift.id }}" style="display: none; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;"></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">&#127881;</div>
+  <h3>All shifts are covered!</h3>
+  <p>Every upcoming shift has enough volunteers. Great job!</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/gaps.js') }}"></script>
+{% endblock %}

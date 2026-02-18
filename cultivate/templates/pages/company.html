@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+{% block title %}{{ prospect.company_name }} — WFM{% endblock %}
+
+{% block content %}
+<!-- Company header -->
+<div class="company-header">
+  <div class="company-info">
+    <a href="/" style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px;">&larr; Back to Progress</a>
+    <h1>{{ prospect.company_name }}</h1>
+    <div class="company-meta">
+      <span>{{ prospect.industry or 'Unknown Industry' }}</span>
+      <span>&middot;</span>
+      <span>{{ prospect.hq_city or 'Unknown City' }}</span>
+      <span>&middot;</span>
+      <span>{{ prospect.nearest_campus or 'No campus assigned' }}</span>
+    </div>
+  </div>
+  <div class="flex gap-8">
+    <select id="stageSelect" class="btn btn-secondary btn-sm" data-id="{{ prospect.id }}" onchange="updateStage(this)">
+      {% for stage in stages %}
+      <option value="{{ stage }}" {{ 'selected' if prospect.pipeline_stage == stage }}>{{ stage }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="autoScore({{ prospect.id }})">Auto-Score</button>
+  </div>
+</div>
+
+<!-- Score circles -->
+<div class="company-scores">
+  <div class="score-circle green" title="Alignment (1-5): How closely does the company's giving focus match WFM's mission? 5=funds food/hunger directly, 4=funds education/health/community, 3=broad social impact, 2=unrelated areas, 1=no giving program">
+    <div class="score-num">{{ prospect.alignment_score }}</div>
+    <div class="score-label">Align</div>
+  </div>
+  <div class="score-circle blue" title="Proximity (1-5): How close is the company to WFM campuses? 5=same city (Cupertino/Los Altos Hills/Hayward), 4=within 10mi, 3=within 25mi, 2=broader Bay Area, 1=no local presence">
+    <div class="score-num">{{ prospect.proximity_score }}</div>
+    <div class="score-label">Prox</div>
+  </div>
+  <div class="score-circle orange" title="Capacity (1-5): How large is the giving program? 5=$10M+ grants/yr, 4=$1-10M grants/yr, 3=$100K-1M grants/yr, 2=$10-100K grants/yr, 1=minimal giving">
+    <div class="score-num">{{ prospect.capacity_score }}</div>
+    <div class="score-label">Cap</div>
+  </div>
+  <div class="score-circle purple" style="width: 82px; height: 82px;" title="Total Score: Sum of Alignment + Proximity + Capacity. Max 15. Score 12+ = priority outreach target.">
+    <div class="score-num" style="font-size: 26px;">{{ prospect.total_score }}</div>
+    <div class="score-label">Total</div>
+  </div>
+</div>
+<div style="font-size: 11px; color: var(--text-muted); margin-top: -8px; margin-bottom: 16px; text-align: center;">
+  Hover over each score for details. Align = mission match &middot; Prox = distance to campus &middot; Cap = giving program size
+</div>
+
+<!-- Two-column layout -->
+<div class="two-col">
+  <!-- Left: Company Info -->
+  <div>
+    <div class="company-section">
+      <h2>Company Info</h2>
+      <div class="info-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="info-item">
+          <div class="info-label">Giving Channel</div>
+          <div class="info-value">{{ prospect.giving_channel or '—' }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Focus Areas</div>
+          <div class="info-value">{{ prospect.focus_areas or '—' }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Foundation</div>
+          <div class="info-value">{{ prospect.foundation_name or ('Yes' if prospect.has_foundation else 'Unknown') }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">CSR Page</div>
+          <div class="info-value">
+            {% if prospect.csr_page_url %}
+            <a href="{{ prospect.csr_page_url }}" target="_blank">View &rarr;</a>
+            {% else %}—{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contacts Section (NEW) -->
+    <div class="company-section">
+      <h2>Contacts ({{ contacts|length }})</h2>
+      {% if prospect.contact_name %}
+      <div class="info-grid mb-8" style="grid-template-columns: 1fr 1fr;">
+        <div class="info-item">
+          <div class="info-label">Primary Contact</div>
+          <div class="info-value">{{ prospect.contact_name }}{% if prospect.contact_title %} &middot; {{ prospect.contact_title }}{% endif %}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Email / LinkedIn</div>
+          <div class="info-value">
+            {% if prospect.contact_email %}{{ prospect.contact_email }}{% endif %}
+            {% if prospect.contact_linkedin %} <a href="{{ prospect.contact_linkedin }}" target="_blank">LinkedIn</a>{% endif %}
+            {% if not prospect.contact_email and not prospect.contact_linkedin %}—{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if contacts %}
+      <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));">
+        {% for c in contacts %}
+        <div class="contact-card" style="padding: 14px;">
+          <h4 style="font-size: 14px;">{{ c.name or 'Unknown' }}</h4>
+          <div class="contact-title" style="font-size: 12px;">{{ c.title or '' }}</div>
+          <div class="contact-links" style="font-size: 12px;">
+            {% if c.email %}<a href="mailto:{{ c.email }}">{{ c.email }}</a>{% endif %}
+            {% if c.linkedin_url %}<a href="{{ c.linkedin_url }}" target="_blank">LinkedIn</a>{% endif %}
+          </div>
+          {% if c.is_primary %}<span class="badge badge-green" style="font-size: 9px; margin-top: 4px;">Primary</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% elif not prospect.contact_name %}
+      <p style="font-size: 13px; color: var(--text-muted);">No contacts on file.</p>
+      {% endif %}
+    </div>
+
+    <!-- Action Items Section (NEW) -->
+    <div class="company-section">
+      <h2>Action Items ({{ action_items|length }})</h2>
+      {% for a in action_items %}
+      <div class="action-item {% if a.status == 'done' %}done{% endif %}" style="margin-bottom: 6px;">
+        <input type="checkbox" class="action-check" {% if a.status == 'done' %}checked{% endif %}
+               onchange="toggleCompanyAction({{ a.id }}, this.checked)">
+        <div class="action-desc" style="flex: 1;">{{ a.description }}</div>
+        <span class="badge {% if a.priority == 'high' %}badge-rose{% elif a.priority == 'medium' %}badge-orange{% else %}badge-green{% endif %}" style="font-size: 10px;">{{ a.priority }}</span>
+      </div>
+      {% endfor %}
+      {% if not action_items %}
+      <p style="font-size: 13px; color: var(--text-muted);">No action items for this company.</p>
+      {% endif %}
+    </div>
+
+    <!-- Pipeline info -->
+    <div class="company-section">
+      <h2>Pipeline</h2>
+      <div class="info-grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="info-item">
+          <div class="info-label">Ask Amount</div>
+          <div class="info-value">${{ "{:,.0f}".format(prospect.ask_amount or 0) }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Amount Received</div>
+          <div class="info-value">${{ "{:,.0f}".format(prospect.amount_received or 0) }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Last Action</div>
+          <div class="info-value">{{ prospect.last_action or '—' }}{% if prospect.last_action_date %} ({{ prospect.last_action_date }}){% endif %}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Next Step</div>
+          <div class="info-value">{{ prospect.next_step or '—' }}{% if prospect.next_step_date %} ({{ prospect.next_step_date }}){% endif %}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: 990 Data + Activity -->
+  <div>
+    <!-- Foundation / 990 Data -->
+    <div class="company-section">
+      <div class="flex-between mb-8">
+        <h2>Foundation / 990 Data</h2>
+        <button class="btn btn-secondary btn-sm" id="fetch990Btn" onclick="fetch990ForCompany({{ prospect.id }})">
+          Fetch 990 Data
+        </button>
+      </div>
+      <div id="foundationData">
+        {% if foundation %}
+        <div class="card">
+          <div class="mb-16">
+            <strong>{{ foundation.foundation_name }}</strong>
+            <span class="badge badge-{{ 'green' if foundation.fit_assessment == 'Strong fit' else ('blue' if foundation.fit_assessment == 'Moderate fit' else 'orange') }}" style="margin-left: 8px;"
+                  title="{% if foundation.fit_assessment == 'Strong fit' %}Mission/grants mention food, hunger, nutrition, or food security{% elif foundation.fit_assessment == 'Moderate fit' %}Mission/grants mention education, community, health, youth, or workforce{% else %}No strong keyword match to WFM's mission areas{% endif %}">
+              {{ foundation.fit_assessment }}</span>
+            <span style="font-size: 11px; color: var(--text-muted); margin-left: 8px;">
+              {% if foundation.fit_assessment == 'Strong fit' %}Keywords: food, hunger, nutrition
+              {% elif foundation.fit_assessment == 'Moderate fit' %}Keywords: education, community, health, youth
+              {% else %}No food/education keywords found in mission{% endif %}
+            </span>
+          </div>
+          <div class="info-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="info-item">
+              <div class="info-label">EIN</div>
+              <div class="info-value">{{ foundation.ein }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Tax Period</div>
+              <div class="info-value">{{ foundation.tax_period }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Total Assets</div>
+              <div class="info-value">${{ "{:,.0f}".format(foundation.total_assets or 0) }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Grants Paid</div>
+              <div class="info-value">${{ "{:,.0f}".format(foundation.total_grants_paid or 0) }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Revenue</div>
+              <div class="info-value">${{ "{:,.0f}".format(foundation.total_revenue or 0) }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Avg Grant Size</div>
+              <div class="info-value">${{ "{:,.0f}".format(foundation.average_grant_size or 0) }}</div>
+            </div>
+          </div>
+          {% if foundation.mission_statement %}
+          <div class="info-item mt-16">
+            <div class="info-label">Mission</div>
+            <div class="info-value" style="font-size: 12px; line-height: 1.6;">{{ foundation.mission_statement }}</div>
+          </div>
+          {% endif %}
+          {% if foundation.pdf_url %}
+          <div class="mt-16">
+            <a href="{{ foundation.pdf_url }}" target="_blank" class="btn btn-ghost btn-sm">View 990 PDF &rarr;</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Deep Research Button -->
+        <div class="mt-16 mb-16">
+          <button class="btn btn-sm btn-primary" id="deepResearchBtn" onclick="deepResearchForCompany({{ prospect.id }})">
+            {% if foundation.deep_research_at %}Re-run Deep Research{% else %}Run Deep Research{% endif %}
+          </button>
+          {% if foundation.deep_research_at %}
+          <span class="deep-research-status done" style="margin-left: 8px;">Last: {{ foundation.deep_research_at.strftime('%b %d, %Y') }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Multi-Year Trend Chart -->
+        {% if yearly_financials %}
+        <div class="company-section">
+          <h3 style="font-size: 14px; margin-bottom: 12px;">Giving Trend ({{ yearly_financials|length }} years)
+            {% if foundation.giving_trend %}
+            <span class="badge {% if foundation.giving_trend == 'growing' %}badge-green{% elif foundation.giving_trend == 'stable' %}badge-blue{% else %}badge-rose{% endif %}" style="margin-left: 8px;">{{ foundation.giving_trend | title }}</span>
+            {% endif %}
+          </h3>
+          <div class="trend-chart">
+            {% for y in yearly_financials %}
+            <div class="trend-bar-group">
+              <div class="trend-bar-label">${{ "{:,.0f}".format((y.total_grants_paid or 0) / 1000000) }}M</div>
+              <div class="trend-bar" style="height: {{ ((y.total_grants_paid or 0) / max_grants * 120)|int if max_grants else 0 }}px;"
+                   title="${{ "{:,.0f}".format(y.total_grants_paid or 0) }}">
+              </div>
+              <div class="trend-year">{{ y.tax_year }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Grantees (Schedule I) -->
+        {% if grantees %}
+        <div class="company-section">
+          <h3 style="font-size: 14px; margin-bottom: 12px;">Top Grantees ({{ grantees|length }})</h3>
+          <div class="table-wrapper" style="max-height: 400px; overflow-y: auto;">
+            <table class="data-table" style="font-size: 12px;">
+              <thead>
+                <tr>
+                  <th>Grantee</th>
+                  <th>Amount</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for g in grantees %}
+                <tr>
+                  <td>{{ g.grantee_name or '—' }}</td>
+                  <td>${{ "{:,.0f}".format(g.amount or 0) }}</td>
+                  <td>
+                    <span class="badge {% if g.category == 'food_hunger' %}badge-green{% elif g.category == 'education' %}badge-blue{% elif g.category == 'health' %}badge-purple{% elif g.category == 'community' %}badge-orange{% else %}badge-muted{% endif %}">
+                      {{ (g.category or 'other') | replace('_', ' ') | title }}
+                    </span>
+                    {% if g.is_bay_area %}<span class="badge badge-green" style="margin-left: 2px; font-size: 9px;">Bay Area</span>{% endif %}
+                  </td>
+                  <td>{{ g.grantee_city or '' }}{% if g.grantee_state %}, {{ g.grantee_state }}{% endif %}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Officers (Part VII) -->
+        {% if officers %}
+        <div class="company-section">
+          <h3 style="font-size: 14px; margin-bottom: 12px;">Officers & Board ({{ officers|length }})</h3>
+          <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+            {% for o in officers %}
+            <div class="info-item">
+              <div class="info-label">{{ o.title or 'Officer' }}</div>
+              <div class="info-value" style="font-size: 13px;">{{ o.name }}</div>
+              {% if o.compensation %}<div style="font-size: 11px; color: var(--text-muted);">${{ "{:,.0f}".format(o.compensation) }}</div>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state" style="padding: 30px;">
+          <p>No 990 data yet. Click "Fetch 990 Data" to search ProPublica.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Outreach email -->
+    <div class="company-section">
+      <div class="flex-between mb-8">
+        <h2>Outreach Email</h2>
+        <button class="btn btn-secondary btn-sm" onclick="generateEmailForCompany({{ prospect.id }})">Generate Email</button>
+      </div>
+      <div id="emailData">
+        {% if email %}
+        <div class="email-card">
+          <div class="email-subject">{{ email.subject }}</div>
+          <div class="email-meta">
+            {{ email.word_count }} words &middot;
+            <span class="badge badge-{{ 'green' if email.status == 'sent' else ('blue' if email.status == 'reviewed' else 'orange') }}">{{ email.status }}</span>
+          </div>
+          <div class="email-body">{{ email.body }}</div>
+          {% if email.personalization_notes %}
+          <div class="email-notes">{{ email.personalization_notes }}</div>
+          {% endif %}
+          <div class="email-actions">
+            <button class="btn btn-ghost btn-sm" onclick="copyEmail({{ email.id }})">Copy to Clipboard</button>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding: 30px;">
+          <p>No outreach email yet. Click "Generate Email" to create a draft.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Activity timeline -->
+    <div class="company-section">
+      <h2>Activity</h2>
+      <div class="card" style="max-height: 300px; overflow-y: auto;">
+        {% if activities %}
+        <div class="timeline">
+          {% for a in activities %}
+          <div class="timeline-item">
+            <div class="timeline-text">{{ a.description }}</div>
+            <div class="timeline-time">{{ a.timestamp.strftime('%b %d, %H:%M') if a.timestamp else '' }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size: 12px; color: var(--text-muted); padding: 8px;">No activity recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="company-section">
+      <h2>Notes</h2>
+      <div class="form-group">
+        <textarea id="notesField" onchange="saveNotes({{ prospect.id }}, this.value)" placeholder="Add notes...">{{ prospect.notes or '' }}</textarea>
+      </div>
+    </div>
+
+    <!-- Research Notes -->
+    <div class="company-section">
+      <div class="flex-between mb-8">
+        <h2>Research Notes ({{ research_notes|length }})</h2>
+        <button class="btn btn-sm btn-secondary" onclick="showAddNoteForm()">Add Note</button>
+      </div>
+
+      <div id="addNoteForm" style="display: none; margin-bottom: 16px;">
+        <div class="card" style="padding: 16px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+            <select id="noteType" style="padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: Karla, sans-serif;">
+              <option value="insight">Insight</option>
+              <option value="news">News</option>
+              <option value="connection">Connection</option>
+              <option value="csr_update">CSR Update</option>
+            </select>
+            <input type="text" id="noteTitle" placeholder="Title..." style="padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: Karla, sans-serif;">
+          </div>
+          <textarea id="noteContent" placeholder="Note content..." style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: Karla, sans-serif; margin-bottom: 8px; resize: vertical;"></textarea>
+          <input type="text" id="noteSourceUrl" placeholder="Source URL (optional)..." style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: Karla, sans-serif; margin-bottom: 8px;">
+          <div class="flex gap-8">
+            <button class="btn btn-sm btn-primary" onclick="saveResearchNote({{ prospect.id }})">Save</button>
+            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('addNoteForm').style.display='none'">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      {% for note in research_notes %}
+      <div class="insight-card" style="position: relative;">
+        <div class="flex-between">
+          <div>
+            <span class="badge badge-blue" style="margin-right: 4px;">{{ note.note_type }}</span>
+            <strong style="font-size: 13px;">{{ note.title }}</strong>
+          </div>
+          <button class="btn-icon" onclick="deleteResearchNote({{ note.id }})" title="Delete" style="font-size: 12px; opacity: 0.5;">&times;</button>
+        </div>
+        <p style="margin-top: 6px;">{{ note.content }}</p>
+        {% if note.source_url %}
+        <a href="{{ note.source_url }}" target="_blank" style="font-size: 12px;">Source &rarr;</a>
+        {% endif %}
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">{{ note.created_at.strftime('%b %d, %Y') if note.created_at else '' }}</div>
+      </div>
+      {% endfor %}
+
+      {% if not research_notes %}
+      <p style="font-size: 13px; color: var(--text-muted);">No research notes yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/company.js') }}"></script>
+{% endblock %}

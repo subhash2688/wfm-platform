@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Settings — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Settings</div>
+  <h1>Settings</h1>
+  <p class="page-subtitle">Database overview, import/export, and management.</p>
+</div>
+
+<!-- DB Stats -->
+<div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 32px;">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.prospects }}</div>
+    <div class="stat-label">Prospects</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-value">{{ stats.foundations }}</div>
+    <div class="stat-label">Foundations</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">{{ stats.emails }}</div>
+    <div class="stat-label">Email Drafts</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-value">{{ stats.deadlines }}</div>
+    <div class="stat-label">Grant Opps</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ stats.contacts }}</div>
+    <div class="stat-label">Contacts</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-value">{{ stats.action_items }}</div>
+    <div class="stat-label">Action Items</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">{{ stats.events }}</div>
+    <div class="stat-label">Events</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.activities }}</div>
+    <div class="stat-label">Activities</div>
+  </div>
+</div>
+
+<div class="two-col">
+  <!-- Import -->
+  <div class="settings-section">
+    <h3>Import from Excel</h3>
+    <p>Import prospects from Corporate_Prospect_Tracker.xlsx. Existing records will be skipped (no duplicates).</p>
+    <button class="btn btn-primary btn-sm" id="importBtn" onclick="importExcel()">Import Prospects</button>
+    <div id="importResult" class="mt-16" style="font-size: 12px; color: var(--text-dim);"></div>
+  </div>
+
+  <!-- Export -->
+  <div class="settings-section">
+    <h3>Export</h3>
+    <p>Download current data as files.</p>
+    <a href="/api/export/excel" class="btn btn-primary btn-sm">Export Excel</a>
+    <a href="/api/export/990-markdown" class="btn btn-secondary btn-sm">990 Markdown</a>
+    <a href="/api/export/emails-markdown" class="btn btn-secondary btn-sm">Emails Markdown</a>
+  </div>
+</div>
+
+<!-- Add prospect -->
+<div class="settings-section">
+  <h3>Add Prospect Manually</h3>
+  <form onsubmit="addProspect(event)">
+    <div class="three-col">
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input type="text" name="company_name" required>
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <select name="industry">
+          <option value="">Select...</option>
+          {% for ind in industries %}
+          <option value="{{ ind }}">{{ ind }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>HQ City</label>
+        <input type="text" name="hq_city">
+      </div>
+      <div class="form-group">
+        <label>Nearest Campus</label>
+        <select name="nearest_campus">
+          <option value="">Select...</option>
+          <option>De Anza College</option>
+          <option>Foothill College</option>
+          <option>Chabot College</option>
+          <option>All Campuses</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Focus Areas</label>
+        <input type="text" name="focus_areas" placeholder="e.g. education, community, food security">
+      </div>
+      <div class="form-group">
+        <label>Foundation Name</label>
+        <input type="text" name="foundation_name">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm mt-16">Add Prospect</button>
+  </form>
+</div>
+
+<!-- Danger zone -->
+<div class="settings-section" style="border-color: var(--rose);">
+  <h3 style="color: var(--rose);">Danger Zone</h3>
+  <p>Reset the database — deletes all data and re-imports from Excel.</p>
+  <button class="btn btn-ghost btn-sm" style="color: var(--rose); border-color: var(--rose);" onclick="resetDb()">Reset Database</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function importExcel() {
+  var btn = document.getElementById('importBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Importing...';
+  apiCall('/api/import-excel', { method: 'POST' })
+    .then(function(data) {
+      document.getElementById('importResult').textContent = data.message;
+      showToast(data.message, 'success');
+      btn.disabled = false;
+      btn.textContent = 'Import Prospects';
+    })
+    .catch(function(e) {
+      showToast('Error: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Import Prospects';
+    });
+}
+
+function addProspect(e) {
+  e.preventDefault();
+  var data = Object.fromEntries(new FormData(e.target));
+  apiCall('/api/prospect', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }).then(function(d) {
+    if (d.error) { showToast(d.error, 'error'); }
+    else { showToast('Prospect added!', 'success'); e.target.reset(); }
+  }).catch(function(e) { showToast('Error: ' + e.message, 'error'); });
+}
+
+function resetDb() {
+  if (!confirm('This will delete ALL data and re-import from Excel. Continue?')) return;
+  apiCall('/api/reset-db', { method: 'POST' })
+    .then(function(d) { showToast(d.message, 'success'); setTimeout(function() { location.reload(); }, 1000); })
+    .catch(function(e) { showToast('Error', 'error'); });
+}
+</script>
+{% endblock %}

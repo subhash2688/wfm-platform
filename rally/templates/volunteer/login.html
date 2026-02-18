@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Rally — Sign In</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+</head>
+<body class="vol-auth-page">
+  <div class="vol-auth-container">
+    <div class="vol-auth-brand">
+      <img src="{{ url_for('static', filename='img/wfm-logo-white.png') }}" alt="WFM" class="vol-auth-logo">
+      <h1 class="vol-auth-title">Rally</h1>
+      <p class="vol-auth-subtitle">Volunteer sign-in</p>
+    </div>
+
+    <div class="vol-auth-card">
+      {% if error %}
+      <div class="vol-alert vol-alert-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('volunteer.login_post') }}">
+        <label class="vol-label" for="phone">Phone number</label>
+        <input type="tel" id="phone" name="phone" class="vol-input" placeholder="(408) 555-0101" required autofocus>
+        <button type="submit" class="vol-btn vol-btn-primary">Send Code</button>
+      </form>
+    </div>
+
+    <p class="vol-auth-footer">World Food Movement &mdash; Fighting student hunger</p>
+  </div>
+</body>
+</html>

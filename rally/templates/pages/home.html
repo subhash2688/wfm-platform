@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Rally — WFM Volunteer Management{% endblock %}
+
+{% block content %}
+<div class="home-split">
+
+  <!-- LEFT: Hero + Two-Tier Stats + Urgency -->
+  <div class="home-left">
+    <h1>
+      Organize the team.<br>
+      Fill the gaps.<br>
+      <em>Serve the students.</em>
+    </h1>
+    <p>
+      Your workspace for coordinating volunteers across three campuses — from shift scheduling to day-of check-ins.
+    </p>
+
+    <!-- Tier 1: Overview (cumulative big picture) -->
+    <div class="stat-group-label">Overview</div>
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="num blue">{{ stats.total_volunteers }}</div>
+        <div class="lbl">Roster</div>
+        <div class="desc">Registered across 3 campuses</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num green">{{ stats.total_hours|int }}h</div>
+        <div class="lbl">Hours</div>
+        <div class="desc">Total served to date</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num purple">{{ stats.completed_shifts }}</div>
+        <div class="lbl">Completed</div>
+        <div class="desc">Shifts finished successfully</div>
+      </div>
+    </div>
+
+    <!-- Tier 2: This Week (operational) -->
+    <div class="stat-group-label">This Week</div>
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="num blue">{{ stats.active_volunteers }}</div>
+        <div class="lbl">Active</div>
+        <div class="desc">Currently active volunteers</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num orange">{{ stats.upcoming_shifts }}</div>
+        <div class="lbl">Upcoming</div>
+        <div class="desc">Shifts on the schedule</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num green">{{ stats.total_signups }}</div>
+        <div class="lbl">Signups</div>
+        <div class="desc">Spots filled across shifts</div>
+      </div>
+    </div>
+
+    <!-- Urgency callout -->
+    {% if stats.gaps > 0 %}
+    <a href="/gaps" class="urgency-callout">
+      <div class="urgency-num">{{ stats.gaps }}</div>
+      <div>
+        <div class="urgency-text">shifts need volunteers</div>
+        <div class="urgency-sub">Review gaps and get smart suggestions &rarr;</div>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- RIGHT: Upcoming Shifts + Recent Activity -->
+  <div class="home-right">
+
+    <!-- Upcoming Shifts tile -->
+    <div class="feed-tile">
+      <div class="feed-tile-header">
+        <h3>&#128197; Upcoming Shifts</h3>
+        <a href="/shifts">View all &rarr;</a>
+      </div>
+      {% for s in shift_items %}
+      <a href="/shifts/{{ s.id }}" class="shift-feed-item">
+        <span class="shift-feed-dot {{ s.campus_class }}"></span>
+        <div class="shift-feed-info">
+          <div class="shift-feed-name">{{ s.type }}</div>
+          <div class="shift-feed-meta">{{ s.campus }} &middot; {{ s.date_label }}, {{ s.time_label }}</div>
+        </div>
+        <div class="shift-feed-fill">
+          <div class="fill-num {{ s.fill_class }}">{{ s.filled }}/{{ s.required }}</div>
+          <div class="fill-lbl">Filled</div>
+        </div>
+      </a>
+      {% endfor %}
+      {% if not shift_items %}
+      <div class="shift-feed-item" style="justify-content:center; color:var(--text-muted); font-size:14px;">
+        No upcoming shifts scheduled
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Recent Activity tile -->
+    <div class="feed-tile">
+      <div class="feed-tile-header">
+        <h3>&#128101; Recent Activity</h3>
+        <a href="/volunteers">View all &rarr;</a>
+      </div>
+      {% for a in activities %}
+      <div class="activity-feed-item">
+        <div class="activity-avatar {{ a.color }}">{{ a.initials }}</div>
+        <div class="activity-info">
+          <div class="activity-title">{{ a.title }}</div>
+          <div class="activity-detail">{{ a.detail }}</div>
+        </div>
+      </div>
+      {% endfor %}
+      {% if not activities %}
+      <div class="activity-feed-item" style="justify-content:center; color:var(--text-muted); font-size:14px;">
+        No recent activity
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="home-footer">
+  <p><strong>Rally</strong> by World Food Movement &middot; Coordinating the volunteers who feed the students</p>
+</div>
+{% endblock %}

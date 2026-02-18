@@ -1,0 +1,1189 @@
+/* Rally Volunteer Mobile CSS — vol- prefix to avoid staff CSS conflicts */
+
+/* ── WFM Blue / Navy palette ──────────────────────────────────── */
+:root {
+  --vol-primary: #0067FF;
+  --vol-primary-dark: #005EE9;
+  --vol-navy: #1d4288;
+  --vol-navy-dark: #142f61;
+  --vol-bg: #E7F6FF;
+  --vol-amber: #D97706;
+  --vol-amber-light: #FEF3C7;
+  --vol-green: #2D6A4F;
+  --vol-green-light: #D1FAE5;
+  --vol-red: #DC2626;
+  --vol-red-light: #FEE2E2;
+  --vol-gray: #6B7280;
+  --vol-gray-light: #F3F4F6;
+  --vol-text: #1F2937;
+  --vol-text-dim: #4B5563;
+  --vol-text-muted: #9CA3AF;
+  --vol-radius: 12px;
+  --vol-radius-sm: 8px;
+  --vol-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --vol-shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+  --vol-header-h: 56px;
+  --vol-nav-h: 64px;
+
+  /* Campus colors */
+  --campus-de-anza: #2563EB;
+  --campus-foothill: #EA580C;
+  --campus-chabot: #7C3AED;
+}
+
+/* ── Reset / base ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.vol-app,
+body.vol-auth-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--vol-text);
+  background: var(--vol-bg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+body.vol-app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+.vol-header {
+  height: var(--vol-header-h);
+  background: var(--vol-navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+  padding-top: env(safe-area-inset-top);
+}
+
+.vol-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vol-header-logo {
+  height: 28px;
+  opacity: 0.95;
+}
+
+.vol-header-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.vol-header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vol-header-name {
+  font-size: 14px;
+  opacity: 0.85;
+}
+
+.vol-header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+.vol-header-initial {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Scrollable content ──────────────────────────────────────── */
+.vol-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--vol-nav-h) + env(safe-area-inset-bottom) + 16px);
+}
+
+/* ── Bottom nav ──────────────────────────────────────────────── */
+.vol-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--vol-nav-h) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+
+.vol-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  color: var(--vol-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  min-height: 48px;
+  transition: color 0.2s;
+}
+
+.vol-nav-item.active {
+  color: var(--vol-primary);
+}
+
+.vol-nav-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* ── Page layout ─────────────────────────────────────────────── */
+.vol-page {
+  padding: 20px 16px;
+}
+
+.vol-greeting {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.vol-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.vol-page-desc {
+  font-size: 14px;
+  color: var(--vol-text-dim);
+  margin-bottom: 16px;
+}
+
+.vol-section {
+  margin-top: 24px;
+}
+
+.vol-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--vol-text);
+}
+
+.vol-back-link {
+  display: inline-block;
+  color: var(--vol-primary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.vol-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--vol-text-dim);
+  font-size: 14px;
+}
+.vol-empty a {
+  color: var(--vol-primary);
+}
+
+/* ── Preference update banner ──────────────────────────────────── */
+.vol-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--vol-amber-light);
+  color: #92400E;
+  padding: 12px 14px;
+  border-radius: var(--vol-radius);
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.vol-banner a {
+  color: #92400E;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.vol-banner-content {
+  flex: 1;
+}
+
+.vol-banner-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #92400E;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.vol-banner-close:hover {
+  opacity: 1;
+}
+
+/* ── Campus filter pills ─────────────────────────────────────── */
+.vol-pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+.vol-pills::-webkit-scrollbar { display: none; }
+
+.vol-pill {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  background: #fff;
+  color: var(--vol-text-dim);
+  border: 1.5px solid #E5E7EB;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.vol-pill.active {
+  background: var(--vol-primary);
+  color: #fff;
+  border-color: var(--vol-primary);
+}
+
+/* ── Shift cards ─────────────────────────────────────────────── */
+.vol-shift-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vol-shift-card {
+  display: block;
+  text-decoration: none;
+  color: var(--vol-text);
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 14px 16px;
+  box-shadow: var(--vol-shadow);
+  border-left: 4px solid var(--vol-gray);
+  transition: box-shadow 0.2s;
+}
+
+.vol-shift-card:active {
+  box-shadow: var(--vol-shadow-md);
+}
+
+.vol-shift-card.campus-de-anza   { border-left-color: var(--campus-de-anza); }
+.vol-shift-card.campus-foothill  { border-left-color: var(--campus-foothill); }
+.vol-shift-card.campus-chabot    { border-left-color: var(--campus-chabot); }
+
+.vol-shift-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.vol-shift-campus {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vol-text-dim);
+}
+
+.vol-shift-type {
+  font-size: 12px;
+  color: var(--vol-text-muted);
+}
+
+.vol-shift-card-date {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vol-shift-card-time {
+  font-size: 13px;
+  color: var(--vol-text-dim);
+  margin-bottom: 10px;
+}
+
+.vol-shift-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Shift row (past shifts in My Shifts) ────────────────────── */
+.vol-shift-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #fff;
+  border-radius: var(--vol-radius-sm);
+  margin-bottom: 8px;
+  border-left: 3px solid var(--vol-gray);
+  box-shadow: var(--vol-shadow);
+}
+
+.vol-shift-row.campus-de-anza   { border-left-color: var(--campus-de-anza); }
+.vol-shift-row.campus-foothill  { border-left-color: var(--campus-foothill); }
+.vol-shift-row.campus-chabot    { border-left-color: var(--campus-chabot); }
+
+.vol-shift-row-campus {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vol-text);
+}
+
+.vol-shift-row-date {
+  font-size: 12px;
+  color: var(--vol-text-dim);
+}
+
+/* ── Fill bar ────────────────────────────────────────────────── */
+.vol-fill-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--vol-gray-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vol-fill-bar-inner {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.vol-fill-bar-inner.full     { background: var(--vol-green); }
+.vol-fill-bar-inner.partial  { background: var(--vol-amber); }
+.vol-fill-bar-inner.critical { background: var(--vol-red); }
+
+.vol-spots-text {
+  font-size: 12px;
+  color: var(--vol-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.vol-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.vol-badge-amber { background: var(--vol-amber-light); color: #92400E; }
+.vol-badge-green { background: var(--vol-green-light); color: #065F46; }
+.vol-badge-gray  { background: var(--vol-gray-light); color: #4B5563; }
+.vol-badge-red   { background: var(--vol-red-light); color: #991B1B; }
+
+/* ── Stats bar ───────────────────────────────────────────────── */
+.vol-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 16px 12px;
+  box-shadow: var(--vol-shadow);
+  margin-bottom: 20px;
+}
+
+.vol-stats-bar.vol-stats-3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.vol-stats-bar.vol-stats-2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.vol-stat {
+  text-align: center;
+}
+
+.vol-stat-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--vol-primary);
+}
+
+.vol-stat-label {
+  display: block;
+  font-size: 11px;
+  color: var(--vol-text-muted);
+  margin-top: 2px;
+}
+
+/* ── Badges row/grid ─────────────────────────────────────────── */
+.vol-badges-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.vol-badge-icon {
+  font-size: 24px;
+}
+
+.vol-badges-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.vol-badge-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border-radius: var(--vol-radius-sm);
+  padding: 12px 16px;
+  box-shadow: var(--vol-shadow);
+  min-width: 90px;
+}
+
+.vol-badge-icon-lg { font-size: 28px; }
+.vol-badge-name { font-size: 12px; font-weight: 600; color: var(--vol-text); }
+.vol-badge-req { font-size: 10px; color: var(--vol-text-muted); }
+
+/* ── Detail card ─────────────────────────────────────────────── */
+.vol-detail-card {
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 20px;
+  box-shadow: var(--vol-shadow-md);
+  border-left: 5px solid var(--vol-gray);
+  margin-bottom: 20px;
+}
+
+.vol-detail-card.campus-de-anza   { border-left-color: var(--campus-de-anza); }
+.vol-detail-card.campus-foothill  { border-left-color: var(--campus-foothill); }
+.vol-detail-card.campus-chabot    { border-left-color: var(--campus-chabot); }
+
+.vol-detail-campus {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vol-text-dim);
+  margin-bottom: 4px;
+}
+
+.vol-detail-type {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.vol-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.vol-detail-row:last-child { border-bottom: none; }
+
+.vol-detail-label {
+  font-size: 13px;
+  color: var(--vol-text-muted);
+}
+
+.vol-detail-value {
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Action area ─────────────────────────────────────────────── */
+.vol-action-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.vol-btn {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--vol-radius-sm);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.vol-btn-primary {
+  background: var(--vol-primary);
+  color: #fff;
+}
+.vol-btn-primary:active { background: var(--vol-primary-dark); }
+
+.vol-btn-secondary {
+  background: #fff;
+  color: var(--vol-primary);
+  border: 1.5px solid var(--vol-primary);
+}
+
+.vol-btn-green {
+  background: var(--vol-green);
+  color: #fff;
+}
+.vol-btn-green:active { background: #1B4D3E; }
+
+.vol-btn-danger-outline {
+  background: transparent;
+  color: var(--vol-red);
+  border: 1.5px solid var(--vol-red);
+}
+
+/* ── Profile ─────────────────────────────────────────────────── */
+.vol-profile-header {
+  text-align: center;
+  padding: 8px 0 20px;
+}
+
+.vol-avatar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.vol-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--vol-navy);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.vol-avatar-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--vol-primary);
+}
+
+.vol-photo-upload-btn {
+  background: none;
+  border: none;
+  color: var(--vol-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.vol-profile-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.vol-profile-phone {
+  font-size: 14px;
+  color: var(--vol-text-dim);
+}
+
+.vol-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Form elements ───────────────────────────────────────────── */
+.vol-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vol-text-dim);
+  margin-bottom: 6px;
+  margin-top: 16px;
+}
+
+.vol-label:first-child { margin-top: 0; }
+
+.vol-input {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #D1D5DB;
+  border-radius: var(--vol-radius-sm);
+  font-size: 16px;
+  background: #fff;
+  color: var(--vol-text);
+  min-height: 48px;
+  transition: border-color 0.2s;
+}
+
+.vol-input:focus {
+  outline: none;
+  border-color: var(--vol-primary);
+  box-shadow: 0 0 0 3px rgba(0, 103, 255, 0.1);
+}
+
+.vol-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vol-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  min-height: 40px;
+  cursor: pointer;
+}
+
+.vol-checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--vol-primary);
+}
+
+/* ── OTP inputs ──────────────────────────────────────────────── */
+.vol-otp-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.vol-otp-input {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  border: 2px solid #D1D5DB;
+  border-radius: var(--vol-radius-sm);
+  background: #fff;
+  color: var(--vol-text);
+  transition: border-color 0.2s;
+}
+
+.vol-otp-input:focus {
+  outline: none;
+  border-color: var(--vol-primary);
+  box-shadow: 0 0 0 3px rgba(0, 103, 255, 0.15);
+}
+
+/* ── Auth pages ──────────────────────────────────────────────── */
+body.vol-auth-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--vol-navy) 0%, var(--vol-navy-dark) 100%);
+  padding: 16px;
+}
+
+.vol-auth-container {
+  width: 100%;
+  max-width: 380px;
+}
+
+.vol-auth-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.vol-auth-logo {
+  height: 40px;
+  margin-bottom: 8px;
+  opacity: 0.95;
+}
+
+.vol-auth-title {
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.vol-auth-subtitle {
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+}
+
+.vol-auth-card {
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 24px 20px;
+  box-shadow: var(--vol-shadow-md);
+}
+
+.vol-auth-footer {
+  text-align: center;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.vol-auth-link {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.vol-auth-link a {
+  color: var(--vol-primary);
+  text-decoration: none;
+}
+
+/* ── Dev mode banner ─────────────────────────────────────────── */
+.vol-dev-banner {
+  background: var(--vol-amber-light);
+  color: #92400E;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: var(--vol-radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ── Alerts ──────────────────────────────────────────────────── */
+.vol-alert {
+  padding: 10px 14px;
+  border-radius: var(--vol-radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.vol-alert-error {
+  background: var(--vol-red-light);
+  color: #991B1B;
+}
+
+/* ── Mission strip ───────────────────────────────────────────── */
+.vol-mission-strip {
+  flex-shrink: 0;
+  background: #162f6b;
+  color: rgba(255,255,255,0.65);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0 16px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Shift day card ──────────────────────────────────────────── */
+.vol-today-section {
+  margin-bottom: 16px;
+}
+
+.vol-today-card {
+  background: linear-gradient(135deg, var(--vol-navy) 0%, var(--vol-primary) 100%);
+  color: #fff;
+  border-radius: var(--vol-radius);
+  padding: 20px;
+  margin-bottom: 12px;
+}
+
+.vol-today-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 8px;
+}
+
+.vol-today-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.vol-today-time {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.vol-today-team {
+  font-size: 13px;
+  opacity: 0.65;
+  margin-bottom: 18px;
+}
+
+.vol-today-btn {
+  display: inline-block;
+  background: #fff;
+  color: var(--vol-navy);
+  font-size: 14px;
+  font-weight: 700;
+  padding: 11px 22px;
+  border-radius: var(--vol-radius-sm);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.vol-today-checked {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: var(--vol-radius-sm);
+  margin-top: 4px;
+}
+
+.vol-today-detail {
+  display: block;
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+}
+
+/* ── Tomorrow reminder ───────────────────────────────────────── */
+.vol-reminder-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--vol-amber-light);
+  border-radius: var(--vol-radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.vol-reminder-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.vol-reminder-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #92400E;
+}
+
+.vol-reminder-time {
+  font-size: 12px;
+  color: #92400E;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* ── Urgent shifts ───────────────────────────────────────────── */
+.vol-urgent-section {
+  margin-bottom: 20px;
+}
+
+.vol-urgent-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--vol-red);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vol-urgent-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid #FECACA;
+  border-left: 4px solid var(--vol-red);
+  border-radius: var(--vol-radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: var(--vol-text);
+}
+
+.vol-urgent-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.vol-urgent-date {
+  font-size: 12px;
+  color: var(--vol-text-dim);
+  margin-top: 2px;
+}
+
+.vol-urgent-spots {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--vol-red);
+  white-space: nowrap;
+}
+
+/* ── Post-shift acknowledgment ───────────────────────────────── */
+.vol-ack-card {
+  display: flex;
+  gap: 14px;
+  background: var(--vol-green-light);
+  border-radius: var(--vol-radius);
+  padding: 18px 16px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.vol-ack-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vol-ack-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vol-green);
+  margin-bottom: 4px;
+}
+
+.vol-ack-detail {
+  font-size: 12px;
+  color: #065F46;
+  margin-bottom: 6px;
+}
+
+.vol-ack-impact {
+  font-size: 13px;
+  color: #065F46;
+  line-height: 1.5;
+}
+
+/* ── Who's coming ────────────────────────────────────────────── */
+.vol-who-section {
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 16px;
+  box-shadow: var(--vol-shadow);
+  margin-bottom: 16px;
+}
+
+.vol-who-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--vol-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.vol-who-names {
+  font-size: 14px;
+  color: var(--vol-text-dim);
+  line-height: 1.5;
+}
+
+/* ── What to expect ──────────────────────────────────────────── */
+.vol-expect-card {
+  background: #fff;
+  border-radius: var(--vol-radius);
+  padding: 16px;
+  box-shadow: var(--vol-shadow);
+  margin-bottom: 20px;
+}
+
+.vol-expect-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--vol-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.vol-expect-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--vol-text-dim);
+}
+
+.vol-expect-label {
+  font-weight: 600;
+  color: var(--vol-text);
+  min-width: 56px;
+  flex-shrink: 0;
+}
+
+.vol-expect-note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #F3F4F6;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--vol-text-muted);
+  line-height: 1.5;
+}
+
+/* ── Toast overrides for mobile ──────────────────────────────── */
+.toast-container {
+  position: fixed;
+  top: calc(var(--vol-header-h) + 26px + 8px);
+  right: 12px;
+  left: 12px;
+  z-index: 200;
+}
+
+.toast {
+  padding: 12px 16px;
+  border-radius: var(--vol-radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  box-shadow: var(--vol-shadow-md);
+}
+
+.toast.success {
+  background: var(--vol-green);
+  color: #fff;
+}
+
+.toast.error {
+  background: var(--vol-red);
+  color: #fff;
+}
+
+/* ── Availability grid (#8) ─────────────────────────────────────── */
+.vol-avail-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.vol-avail-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.vol-avail-day-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--vol-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.vol-avail-slot {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--vol-border);
+  background: var(--vol-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--vol-text-muted);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  user-select: none;
+}
+
+.vol-avail-slot input[type="checkbox"] {
+  display: none;
+}
+
+.vol-avail-slot:has(input:checked),
+.vol-avail-slot.vol-avail-on {
+  background: var(--vol-primary);
+  border-color: var(--vol-primary);
+  color: #fff;
+}
+
+@media (max-width: 360px) {
+  .vol-avail-grid { grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .vol-avail-slot { width: 28px; height: 28px; font-size: 10px; }
+}
+
+/* Shift briefing notes on today card (#12) */
+.vol-today-notes {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 10px 0;
+  line-height: 1.5;
+}

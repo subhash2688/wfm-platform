@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Outreach Center — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Outreach</div>
+  <h1>Outreach Center</h1>
+  <p class="page-subtitle">Draft, review, and send personalized outreach emails to corporate prospects.</p>
+</div>
+
+<div class="flex-between mb-24">
+  <div class="flex gap-8">
+    <button class="btn btn-primary btn-sm" id="generateBtn" onclick="generateTopEmails()">Generate for Top 15</button>
+    <button class="btn btn-secondary btn-sm" onclick="window.location.href='/api/export/emails-markdown'">Export Markdown</button>
+  </div>
+  <div class="flex gap-16" style="font-size: 12px; color: var(--text-muted);">
+    <span>{{ emails|length }} emails</span>
+    <span>{{ emails|selectattr('status', 'equalto', 'draft')|list|length }} drafts</span>
+    <span>{{ emails|selectattr('status', 'equalto', 'sent')|list|length }} sent</span>
+  </div>
+</div>
+
+{% if emails %}
+{% for email in emails %}
+<div class="email-card" id="email-{{ email.id }}">
+  <div class="email-header">
+    <div>
+      <div class="email-subject">{{ email.company_name }}</div>
+      <div class="email-meta">
+        Subject: <strong>{{ email.subject }}</strong>
+      </div>
+    </div>
+    <div class="flex gap-8">
+      <span class="word-count {{ 'ok' if email.word_count <= 150 else ('warning' if email.word_count <= 180 else 'over') }}">
+        {{ email.word_count }} words
+      </span>
+      <span class="badge badge-{{ 'green' if email.status == 'sent' else ('blue' if email.status == 'reviewed' else 'orange') }}">
+        {{ email.status }}
+      </span>
+    </div>
+  </div>
+
+  <div class="email-body" id="emailBody-{{ email.id }}">{{ email.body }}</div>
+
+  {% if email.personalization_notes %}
+  <div class="email-notes">{{ email.personalization_notes }}</div>
+  {% endif %}
+
+  <div class="email-actions">
+    <button class="btn btn-ghost btn-sm" onclick="copyEmailText({{ email.id }})">Copy</button>
+    <button class="btn btn-ghost btn-sm" onclick="editEmail({{ email.id }})">Edit</button>
+    {% if email.status == 'draft' %}
+    <button class="btn btn-ghost btn-sm" onclick="markStatus({{ email.id }}, 'reviewed')">Mark Reviewed</button>
+    {% elif email.status == 'reviewed' %}
+    <button class="btn btn-ghost btn-sm" onclick="markStatus({{ email.id }}, 'sent')">Mark Sent</button>
+    {% endif %}
+    <button class="btn btn-ghost btn-sm" onclick="regenerateEmail({{ email.prospect_id }})">Regenerate</button>
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">&#9993;</div>
+  <h3>No outreach emails yet</h3>
+  <p>Click "Generate for Top 15" to create personalized email drafts for your highest-scoring prospects.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/outreach.js') }}"></script>
+{% endblock %}

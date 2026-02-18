@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Shifts — Rally{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Shifts</div>
+  <h1>Shift Schedule</h1>
+  <p class="page-subtitle">{{ shifts|length }} shifts across three campuses. Create new shifts, manage signups, and track coverage.</p>
+</div>
+
+<!-- Create form (hidden by default) -->
+<div class="card mb-24" style="display: none;" id="createShiftForm">
+  <h3 style="margin-bottom: 16px;">Create New Shift</h3>
+  <form onsubmit="createShift(event)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+      <div class="form-group">
+        <label>Campus *</label>
+        <select name="campus" required>
+          <option value="">Select...</option>
+          {% for c in campuses %}
+          <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Date *</label>
+        <input type="date" name="date" required>
+      </div>
+      <div class="form-group">
+        <label>Activity Type</label>
+        <select name="shift_type">
+          {% for t in shift_types %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Service Type</label>
+        <select name="service_type">
+          {% for st in service_types %}
+          <option value="{{ st }}">{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Start Time *</label>
+        <input type="time" name="start_time" value="09:00" required>
+      </div>
+      <div class="form-group">
+        <label>End Time *</label>
+        <input type="time" name="end_time" value="13:00" required>
+      </div>
+      <div class="form-group">
+        <label>Volunteers Needed</label>
+        <input type="number" name="required_count" value="4" min="1" max="20">
+      </div>
+    </div>
+    <div class="flex gap-8 mt-16">
+      <button type="submit" class="btn btn-sm btn-primary">Create Shift</button>
+      <button type="button" class="btn btn-sm btn-ghost" onclick="showCreateShift()">Cancel</button>
+    </div>
+  </form>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <input type="text" id="searchInput" placeholder="Search shifts..." style="width: 220px;">
+  <select id="filterCampus">
+    <option value="">All Campuses</option>
+    {% for c in campuses %}
+    <option value="{{ c }}">{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select id="filterStatus">
+    <option value="">All Statuses</option>
+    <option value="scheduled">Scheduled</option>
+    <option value="completed">Completed</option>
+    <option value="cancelled">Cancelled</option>
+  </select>
+  <select id="filterType">
+    <option value="">All Activity Types</option>
+    {% for t in shift_types %}
+    <option value="{{ t }}">{{ t }}</option>
+    {% endfor %}
+  </select>
+  <select id="filterServiceType">
+    <option value="">All Service Types</option>
+    {% for st in service_types %}
+    <option value="{{ st }}">{{ st }}</option>
+    {% endfor %}
+  </select>
+  <div style="flex:1;"></div>
+  <button class="btn btn-sm btn-primary" onclick="showCreateShift()">+ New Shift</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrapper">
+  <table class="data-table" id="shiftsTable">
+    <thead>
+      <tr>
+        <th data-sort="date">Date <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="campus">Campus <span class="sort-arrow">&#9650;</span></th>
+        <th>Time</th>
+        <th data-sort="type">Activity <span class="sort-arrow">&#9650;</span></th>
+        <th>Service</th>
+        <th data-sort="fill">Coverage <span class="sort-arrow">&#9650;</span></th>
+        <th data-sort="status">Status <span class="sort-arrow">&#9650;</span></th>
+        <th style="width: 60px;"></th>
+      </tr>
+    </thead>
+    <tbody id="shiftsBody">
+      {% for s in shifts %}
+      <tr data-id="{{ s.id }}"
+          data-campus="{{ s.campus }}"
+          data-date="{{ s.date }}"
+          data-type="{{ s.shift_type }}"
+          data-service-type="{{ s.service_type or '' }}"
+          data-status="{{ s.status }}"
+          data-fill="{{ s.filled }}">
+        <td>
+          <a href="/shifts/{{ s.id }}" class="company-link">
+            {{ s.date.strftime('%a, %b %d') }}
+          </a>
+        </td>
+        <td>
+          <span class="badge badge-{{ campus_colors.get(s.campus, 'blue') }}">
+            {{ s.campus.replace(' College', '') }}
+          </span>
+        </td>
+        <td>{{ s.start_time.strftime('%I:%M %p') }} – {{ s.end_time.strftime('%I:%M %p') }}</td>
+        <td>{{ s.shift_type }}</td>
+        <td><span style="font-size: 12px; color: var(--text-dim);">{{ s.service_type or '—' }}</span></td>
+        <td>
+          <div class="fill-bar" style="width: 100px; display: inline-block; vertical-align: middle;">
+            <div class="fill-bar-inner {{ 'full' if s.filled >= s.required_count else ('partial' if s.filled >= s.required_count // 2 else 'critical') }}"
+                 style="width: {{ (s.filled / s.required_count * 100) if s.required_count > 0 else 0 }}%"></div>
+          </div>
+          <span class="fill-text {{ 'full' if s.filled >= s.required_count else ('partial' if s.filled >= s.required_count // 2 else 'critical') }}">
+            {{ s.filled }}/{{ s.required_count }}
+          </span>
+        </td>
+        <td>
+          <span class="badge badge-{{ 'green' if s.status == 'completed' else ('blue' if s.status == 'scheduled' else 'rose') }}">
+            {{ s.status }}
+          </span>
+        </td>
+        <td>
+          <a href="/shifts/{{ s.id }}" class="btn-icon" title="View details">&#128065;</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if not shifts %}
+<div class="empty-state">
+  <div class="empty-icon">&#128197;</div>
+  <h3>No shifts yet</h3>
+  <p>Create your first shift to start scheduling volunteers across campuses.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/shifts.js') }}"></script>
+{% endblock %}

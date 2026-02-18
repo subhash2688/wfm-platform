@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+{% block title %}990 Analysis — WFM Corporate Fundraising{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Research</div>
+  <h1>Foundation 990 Analysis</h1>
+  <p class="page-subtitle">Deep dive into corporate foundation IRS 990 filings — where the money comes from, where it goes, and what causes they fund.</p>
+</div>
+
+<!-- Action buttons -->
+<div class="flex-between mb-24">
+  <div class="flex gap-8">
+    <button class="btn btn-primary btn-sm" id="fetchAllBtn" onclick="fetchAll990()">Fetch All Foundations</button>
+    <button class="btn btn-secondary btn-sm" id="refetchAllBtn" onclick="refetchAll990()">Re-fetch All (Update)</button>
+    <button class="btn btn-ghost btn-sm" onclick="window.location.href='/api/export/990-markdown'">Export Markdown</button>
+  </div>
+  <span style="font-size: 13px; color: var(--text-muted);">{{ foundations|length }} foundations loaded</span>
+</div>
+
+{% if foundations %}
+<!-- Aggregate summary -->
+<div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 32px;">
+  <div class="stat-card">
+    <div class="stat-value">${{ format_millions(total_foundation_assets) }}</div>
+    <div class="stat-label">Combined Foundation Assets</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-value">${{ format_millions(total_foundation_grants) }}</div>
+    <div class="stat-label">Combined Grants Paid</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ foundations|length }}</div>
+    <div class="stat-label">Foundations Tracked</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">${{ format_millions(avg_grant_across) }}</div>
+    <div class="stat-label">Avg Grants per Foundation</div>
+  </div>
+</div>
+
+<!-- Fit assessment + program areas overview -->
+<div class="two-col mb-24">
+  <div class="card" style="cursor: default;">
+    <h3 style="margin-bottom: 16px;">Fit Assessment</h3>
+    {% for fit, count in fit_counts.items() %}
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+      <span class="badge badge-{{ 'green' if fit == 'Strong fit' else ('blue' if fit == 'Moderate fit' else 'orange') }}">{{ fit }}</span>
+      <span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 20px; font-weight: 700; color: var(--text);">{{ count }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="card" style="cursor: default;">
+    <h3 style="margin-bottom: 16px;">Causes Funded (Across All Foundations)</h3>
+    {% for area, count in sorted_areas %}
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; {% if not loop.last %}border-bottom: 1px solid var(--border);{% endif %}">
+      <span style="font-size: 13px; color: var(--text-dim);">{{ area }}</span>
+      <span class="badge badge-blue">{{ count }}</span>
+    </div>
+    {% endfor %}
+    {% if not sorted_areas %}
+    <p style="font-size: 13px; color: var(--text-muted);">Cause data will populate after fetching 990s.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Individual foundation cards -->
+<div class="section-header">Foundation Details</div>
+
+{% for f in foundations %}
+<div class="foundation-card mb-24" id="foundation-{{ f.id }}">
+  <!-- Header -->
+  <div class="foundation-header">
+    <div>
+      <div class="foundation-name" style="font-size: 18px;">{{ f.foundation_name }}</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <span>EIN: {{ f.ein }}</span>
+        <span>{{ f.filing_type or '990-PF' }}</span>
+        <span>Tax Year: {{ f.tax_period }}</span>
+        {% if f.foundation_city %}<span>{{ f.foundation_city }}, {{ f.foundation_state }}</span>{% endif %}
+        <a href="/company/{{ f.prospect_id }}">View Company &rarr;</a>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span class="badge badge-{{ 'green' if f.fit_assessment == 'Strong fit' else ('blue' if f.fit_assessment == 'Moderate fit' else 'orange') }}">{{ f.fit_assessment }}</span>
+      <button class="btn btn-ghost btn-sm" onclick="toggleDetail({{ f.id }})" id="toggleBtn-{{ f.id }}">Show Details</button>
+    </div>
+  </div>
+
+  <!-- Key metrics bar -->
+  <div class="foundation-stats" style="margin-top: 16px;">
+    <div class="foundation-stat">
+      <div class="stat-value">${{ format_millions(f.total_assets) }}</div>
+      <div class="stat-label">Total Assets</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value" style="color: var(--green);">${{ format_millions(f.total_grants_paid) }}</div>
+      <div class="stat-label">Grants Paid</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value">${{ format_millions(f.total_revenue) }}</div>
+      <div class="stat-label">Total Revenue</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value">${{ format_millions(f.total_expenses) }}</div>
+      <div class="stat-label">Total Expenses</div>
+    </div>
+    <div class="foundation-stat">
+      <div class="stat-value" style="color: var(--orange);">${{ "{:,.0f}".format(f.average_grant_size or 0) }}</div>
+      <div class="stat-label">Est. Avg Grant</div>
+    </div>
+  </div>
+
+  <!-- Program areas / causes -->
+  {% if f._parsed_areas %}
+  <div style="margin-top: 16px; display: flex; gap: 6px; flex-wrap: wrap;">
+    {% for area in f._parsed_areas %}
+    <span class="badge badge-{% if 'Food' in area %}green{% elif 'Education' in area %}blue{% elif 'Health' in area %}purple{% elif 'Community' in area %}orange{% else %}blue{% endif %}">{{ area }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Expandable detail section -->
+  <div class="foundation-detail" id="detail-{{ f.id }}" style="display: none; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+
+    <!-- Mission -->
+    {% if f.mission_statement %}
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 8px;">Mission Statement</h4>
+      <p style="font-size: 14px; color: var(--text-dim); line-height: 1.65; padding: 12px 16px; background: var(--primary-light); border-radius: 6px;">{{ f.mission_statement }}</p>
+    </div>
+    {% endif %}
+
+    <div class="two-col">
+      <!-- Revenue breakdown -->
+      <div>
+        <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px;">Where Money Comes From</h4>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          {% set rev_items = [
+            ('Corporate Contributions', f.contributions_received, 'grscontrgifts'),
+            ('Investment Income', f.investment_income, 'interest + dividends'),
+            ('Capital Gains', f.capital_gains, 'totexcapgn'),
+            ('Other Income', f.other_income, 'otherincamt'),
+          ] %}
+          {% for label, value, note in rev_items %}
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; {% if not loop.last %}border-bottom: 1px solid var(--border);{% endif %}">
+            <div>
+              <span style="font-size: 13px; color: var(--text);">{{ label }}</span>
+              <span style="font-size: 10px; color: var(--text-muted); margin-left: 6px;">{{ note }}</span>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 14px; font-weight: 700; color: var(--text);">{{ format_currency(value) }}</span>
+              {% if f.total_revenue %}<span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">{{ format_pct(value, f.total_revenue) }}</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          <div style="display: flex; justify-content: space-between; padding: 10px 16px; background: var(--surface2); font-weight: 700; font-size: 14px;">
+            <span>Total Revenue</span>
+            <span>{{ format_currency(f.total_revenue) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expense breakdown -->
+      <div>
+        <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px;">Where Money Goes</h4>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;">
+          {% set exp_items = [
+            ('Grants to Organizations', f.grants_to_orgs, 'contrpdpbks'),
+            ('Program Expenses', f.program_expenses, 'totexpnsexempt'),
+            ('Administrative', f.admin_expenses, 'topradmnexpnsa'),
+            ('Officer Compensation', f.officer_compensation, 'salaries/comp'),
+          ] %}
+          {% for label, value, note in exp_items %}
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; {% if not loop.last %}border-bottom: 1px solid var(--border);{% endif %}">
+            <div>
+              <span style="font-size: 13px; color: var(--text);">{{ label }}</span>
+              <span style="font-size: 10px; color: var(--text-muted); margin-left: 6px;">{{ note }}</span>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 14px; font-weight: 700; color: var(--text);">{{ format_currency(value) }}</span>
+              {% if f.total_expenses %}<span style="font-size: 11px; color: var(--text-muted); margin-left: 6px;">{{ format_pct(value, f.total_expenses) }}</span>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          <div style="display: flex; justify-content: space-between; padding: 10px 16px; background: var(--surface2); font-weight: 700; font-size: 14px;">
+            <span>Total Expenses</span>
+            <span>{{ format_currency(f.total_expenses) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grant characteristics + investment info -->
+    <div class="two-col" style="margin-top: 20px;">
+      <div>
+        <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px;">Grant Characteristics</h4>
+        <div class="info-grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="info-item">
+            <div class="info-label">Gives to Organizations</div>
+            <div class="info-value">{{ 'Yes' if f.gives_to_orgs == 'Y' else 'No' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Gives to Individuals</div>
+            <div class="info-value">{{ 'Yes' if f.gives_to_individuals == 'Y' else 'No' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">In-Kind / Furnishes Goods</div>
+            <div class="info-value">{{ 'Yes' if f.furnishes_goods == 'Y' else 'No' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Est. Number of Grantees</div>
+            <div class="info-value">~{{ f.num_grantees or 'Unknown' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">NTEE Classification</div>
+            <div class="info-value">{{ f.ntee_code or '—' }} — {{ f.ntee_description or 'Unknown' }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Geographic Focus</div>
+            <div class="info-value">{{ f.geographic_focus or 'Unknown' }}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 12px;">Investment & Distribution</h4>
+        <div class="info-grid" style="grid-template-columns: 1fr;">
+          <div class="info-item">
+            <div class="info-label">Net Investment Income</div>
+            <div class="info-value" style="font-size: 16px; font-weight: 700; color: var(--primary);">{{ format_currency(f.net_investment_income) }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Minimum Investment Return (5% Rule)</div>
+            <div class="info-value">{{ format_currency(f.minimum_investment_return) }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Distributable Amount</div>
+            <div class="info-value" style="font-weight: 700; color: var(--green);">{{ format_currency(f.distributable_amount) }}</div>
+          </div>
+        </div>
+        {% if f.distributable_amount and f.total_grants_paid and f.distributable_amount > 0 %}
+        <div style="margin-top: 12px; padding: 10px 14px; background: var(--green-bg); border-radius: 6px; font-size: 12px; color: var(--green);">
+          {% if f.total_grants_paid >= f.distributable_amount %}
+            This foundation is meeting its required distribution.
+          {% else %}
+            Foundation is distributing {{ format_pct(f.total_grants_paid, f.distributable_amount) }} of its required minimum — may have more capacity.
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Links -->
+    <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+      {% if f.pdf_url %}
+      <a href="{{ f.pdf_url }}" target="_blank" class="btn btn-ghost btn-sm">View 990 PDF (Full Grantee List) &rarr;</a>
+      {% endif %}
+      {% if f.foundation_url %}
+      <a href="{{ f.foundation_url }}" target="_blank" class="btn btn-ghost btn-sm">Foundation Website &rarr;</a>
+      {% endif %}
+      <a href="https://projects.propublica.org/nonprofits/organizations/{{ f.ein }}" target="_blank" class="btn btn-ghost btn-sm">ProPublica Page &rarr;</a>
+      <button class="btn btn-ghost btn-sm" onclick="refetch990({{ f.prospect_id }})">Re-fetch Data</button>
+    </div>
+
+  </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">&#128270;</div>
+  <h3>No foundation data yet</h3>
+  <p>Click "Fetch All Foundations" to pull IRS 990 data from ProPublica for all prospects with known foundations.</p>
+</div>
+{% endif %}
+
+<!-- Campus presence cross-reference -->
+<div class="section-header mt-24">All Prospects by Campus Proximity</div>
+<p style="font-size: 14px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.65;">Every company on the prospect list, grouped by their nearest WFM campus. Companies near multiple campuses appear under each.</p>
+
+{% for campus, companies in campus_companies.items() %}
+<div style="margin-bottom: 24px;">
+  <h3 style="font-size: 15px; margin-bottom: 12px;">{{ campus }} <span style="font-size: 13px; color: var(--text-muted); font-weight: 400;">({{ companies|length }} companies)</span></h3>
+  {% if companies %}
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Industry</th>
+          <th>HQ City</th>
+          <th>Foundation</th>
+          <th>Focus Areas</th>
+          <th>Score</th>
+          <th>Stage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in companies|sort(attribute='total_score', reverse=True) %}
+        <tr>
+          <td><a href="/company/{{ p.id }}" class="company-link">{{ p.company_name }}</a></td>
+          <td>{{ p.industry or '—' }}</td>
+          <td>{{ p.hq_city or '—' }}</td>
+          <td>{{ p.foundation_name or '—' }}</td>
+          <td style="max-width: 200px; font-size: 12px;">{{ p.focus_areas or '—' }}</td>
+          <td><strong style="color: var(--primary);">{{ p.total_score or 0 }}</strong></td>
+          <td><span class="badge badge-blue" style="font-size: 10px;">{{ p.pipeline_stage or '1-Research' }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="font-size: 13px; color: var(--text-muted);">No prospects assigned to this campus yet.</p>
+  {% endif %}
+</div>
+{% endfor %}
+
+<!-- Prospects without foundation data -->
+{% if missing_foundations %}
+<div class="section-header mt-24">Prospects Without Foundation Data</div>
+<div class="table-wrapper">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Company</th>
+        <th>Foundation Name</th>
+        <th>Industry</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in missing_foundations %}
+      <tr>
+        <td><a href="/company/{{ p.id }}" class="company-link">{{ p.company_name }}</a></td>
+        <td>{{ p.foundation_name or '(search by company name)' }}</td>
+        <td>{{ p.industry or '—' }}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="fetch990Single({{ p.id }})">Fetch</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDetail(id) {
+  const detail = document.getElementById('detail-' + id);
+  const btn = document.getElementById('toggleBtn-' + id);
+  if (detail.style.display === 'none') {
+    detail.style.display = 'block';
+    btn.textContent = 'Hide Details';
+  } else {
+    detail.style.display = 'none';
+    btn.textContent = 'Show Details';
+  }
+}
+
+function fetchAll990() {
+  const btn = document.getElementById('fetchAllBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Fetching...';
+  fetch('/api/fetch-all-990', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      showToast(data.message || 'Done!', 'success');
+      setTimeout(() => location.reload(), 1500);
+    })
+    .catch(e => { showToast('Error: ' + e.message, 'error'); })
+    .finally(() => { btn.disabled = false; btn.textContent = 'Fetch All Foundations'; });
+}
+
+function refetchAll990() {
+  if (!confirm('This will re-fetch ALL foundation data from ProPublica. Continue?')) return;
+  const btn = document.getElementById('refetchAllBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Re-fetching...';
+  fetch('/api/refetch-all-990', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      showToast(data.message || 'Done!', 'success');
+      setTimeout(() => location.reload(), 1500);
+    })
+    .catch(e => { showToast('Error: ' + e.message, 'error'); })
+    .finally(() => { btn.disabled = false; btn.textContent = 'Re-fetch All (Update)'; });
+}
+
+function fetch990Single(id) {
+  fetch('/api/prospect/' + id + '/fetch-990', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { showToast(data.error, 'error'); }
+      else { showToast('Fetched 990 data!', 'success'); setTimeout(() => location.reload(), 1000); }
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+function refetch990(prospectId) {
+  fetch('/api/prospect/' + prospectId + '/refetch-990', { method: 'POST' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { showToast(data.error, 'error'); }
+      else { showToast('Re-fetched successfully!', 'success'); setTimeout(() => location.reload(), 1000); }
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+</script>
+{% endblock %}

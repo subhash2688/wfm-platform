@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Settings — Rally{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-tag">Settings</div>
+  <h1>Settings</h1>
+  <p class="page-subtitle">Manage campuses, seed data, export, and database controls.</p>
+</div>
+
+<!-- DB Stats -->
+<div class="stat-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 32px;">
+  <div class="stat-card blue">
+    <div class="stat-value">{{ stats.volunteers }}</div>
+    <div class="stat-label">Volunteers</div>
+  </div>
+  <div class="stat-card orange">
+    <div class="stat-value">{{ stats.shifts }}</div>
+    <div class="stat-label">Shifts</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-value">{{ stats.signups }}</div>
+    <div class="stat-label">Signups</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ stats.recurring }}</div>
+    <div class="stat-label">Recurring Series</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.activities }}</div>
+    <div class="stat-label">Activities</div>
+  </div>
+</div>
+
+<!-- Campus Management -->
+<div class="settings-section mb-24">
+  <h3>Campuses</h3>
+  <p>Manage the campuses where WFM operates. Campuses appear in shift creation, volunteer preferences, and filters.</p>
+
+  <!-- Existing campuses -->
+  <div id="campusList" style="margin-bottom: 16px;">
+    {% for c in campuses %}
+    <div class="flex-between" style="padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--surface);" data-campus-id="{{ c.id }}">
+      <div class="flex-center gap-12">
+        <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--{{ c.color }}); flex-shrink: 0;"></span>
+        <div>
+          <span style="font-weight: 600; font-size: 14px;">{{ c.name }}</span>
+          {% if c.city %}
+          <span style="color: var(--text-muted); font-size: 13px; margin-left: 8px;">{{ c.city }}{% if c.zip_code %}, {{ c.zip_code }}{% endif %}</span>
+          {% endif %}
+        </div>
+      </div>
+      <button class="btn-icon" title="Remove campus" onclick="deleteCampus({{ c.id }}, '{{ c.name }}')" style="color: var(--text-muted); font-size: 16px; cursor: pointer; background: none; border: none;">&times;</button>
+    </div>
+    {% endfor %}
+    {% if not campuses %}
+    <div style="padding: 12px; color: var(--text-muted); font-size: 13px;">No campuses configured. Add one below or seed the database.</div>
+    {% endif %}
+  </div>
+
+  <!-- Add campus form -->
+  <div style="border: 1px dashed var(--border); border-radius: 8px; padding: 16px; background: var(--surface2);">
+    <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px;">Add New Campus</div>
+    <form onsubmit="addCampus(event)" style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+      <div class="form-group" style="margin:0;">
+        <label>Name *</label>
+        <input type="text" name="campus_name" placeholder="e.g. Mission College" required style="font-size: 13px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>City</label>
+        <input type="text" name="campus_city" placeholder="Santa Clara" style="font-size: 13px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>Zip</label>
+        <input type="text" name="campus_zip" placeholder="95054" style="font-size: 13px;">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>Color</label>
+        <select name="campus_color" style="font-size: 13px;">
+          {% for color in color_palette %}
+          <option value="{{ color }}">{{ color|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-sm btn-primary" style="height: 36px;">Add</button>
+    </form>
+  </div>
+</div>
+
+<div class="two-col">
+  <!-- Seed Data -->
+  <div class="settings-section">
+    <h3>Seed Demo Data</h3>
+    <p>Populate the database with 20 volunteers, 15 shifts, and ~40 signups. Only works on an empty database.</p>
+    <button class="btn btn-primary btn-sm" id="seedBtn" onclick="seedData()">Seed Database</button>
+    <div id="seedResult" class="mt-16" style="font-size: 12px; color: var(--text-dim);"></div>
+  </div>
+
+  <!-- Export -->
+  <div class="settings-section">
+    <h3>Export</h3>
+    <p>Download the volunteer roster with stats as a CSV file.</p>
+    <a href="/api/export/csv" class="btn btn-primary btn-sm">Export Roster CSV</a>
+  </div>
+</div>
+
+<!-- Danger zone -->
+<div class="settings-section" style="border-color: var(--rose);">
+  <h3 style="color: var(--rose);">Danger Zone</h3>
+  <p>Reset the database — deletes all data including campuses. You can re-seed after resetting.</p>
+  <button class="btn btn-ghost btn-sm" style="color: var(--rose); border-color: var(--rose);" onclick="resetDb()">Reset Database</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function addCampus(e) {
+  e.preventDefault();
+  var form = e.target;
+  var data = {
+    name: form.campus_name.value.trim(),
+    city: form.campus_city.value.trim(),
+    zip_code: form.campus_zip.value.trim(),
+    color: form.campus_color.value
+  };
+  if (!data.name) return;
+
+  apiCall('/api/campuses', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function() {
+    showToast('Campus added', 'success');
+    setTimeout(function() { location.reload(); }, 500);
+  }).catch(function(err) {
+    showToast('Error: ' + err.message, 'error');
+  });
+}
+
+function deleteCampus(id, name) {
+  if (!confirm('Remove campus "' + name + '"? This won\'t delete shifts already assigned to it.')) return;
+  apiCall('/api/campuses/' + id, { method: 'DELETE' })
+    .then(function() {
+      showToast('Campus removed', 'success');
+      var el = document.querySelector('[data-campus-id="' + id + '"]');
+      if (el) el.remove();
+    })
+    .catch(function(err) { showToast('Error: ' + err.message, 'error'); });
+}
+
+function seedData() {
+  var btn = document.getElementById('seedBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Seeding...';
+  apiCall('/api/seed', { method: 'POST' })
+    .then(function(data) {
+      document.getElementById('seedResult').textContent = data.message;
+      showToast(data.message, 'success');
+      btn.disabled = false;
+      btn.textContent = 'Seed Database';
+      setTimeout(function() { location.reload(); }, 1000);
+    })
+    .catch(function(e) {
+      showToast('Error: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Seed Database';
+    });
+}
+
+function resetDb() {
+  if (!confirm('This will delete ALL Rally data including campuses. Continue?')) return;
+  apiCall('/api/reset-db', { method: 'POST' })
+    .then(function(d) {
+      showToast(d.message, 'success');
+      setTimeout(function() { location.reload(); }, 1000);
+    })
+    .catch(function(e) { showToast('Error', 'error'); });
+}
+</script>
+{% endblock %}

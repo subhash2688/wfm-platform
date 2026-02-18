@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>{% block title %}Rally — Volunteer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+</head>
+<body class="vol-app">
+  <!-- Header -->
+  <header class="vol-header">
+    <div class="vol-header-brand">
+      <img src="{{ url_for('static', filename='img/wfm-logo-white.png') }}" alt="WFM" class="vol-header-logo">
+      <span class="vol-header-title">Rally</span>
+    </div>
+    {% if volunteer %}
+    <div class="vol-header-user">
+      {% if volunteer.photo %}
+      <img src="{{ url_for('static', filename='uploads/volunteers/' + volunteer.photo) }}" alt="" class="vol-header-avatar" id="headerAvatar">
+      {% else %}
+      <span class="vol-header-initial" id="headerAvatar">{{ volunteer.first_name[0] }}</span>
+      {% endif %}
+      <span class="vol-header-name">{{ volunteer.first_name }}</span>
+    </div>
+    {% endif %}
+  </header>
+
+  <!-- Mission strip -->
+  <div class="vol-mission-strip">No Student Goes Hungry &nbsp;&middot;&nbsp; World Food Movement</div>
+
+  <!-- Scrollable content -->
+  <main class="vol-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Bottom navigation -->
+  <nav class="vol-bottom-nav">
+    <a href="{{ url_for('volunteer.shifts_browse') }}" class="vol-nav-item {{ 'active' if active_tab == 'shifts' }}">
+      <svg class="vol-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Shifts</span>
+    </a>
+    <a href="{{ url_for('volunteer.my_shifts') }}" class="vol-nav-item {{ 'active' if active_tab == 'my_shifts' }}">
+      <svg class="vol-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>My Shifts</span>
+    </a>
+    <a href="{{ url_for('volunteer.profile') }}" class="vol-nav-item {{ 'active' if active_tab == 'profile' }}">
+      <svg class="vol-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/volunteer.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
