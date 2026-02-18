@@ -28,6 +28,7 @@ def init_db():
     import models.foundation_grant
     import models.foundation_officer
     import models.research_note
+    import models.staff
     Base.metadata.create_all(bind=engine)
     migrate_db()
 

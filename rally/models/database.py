@@ -21,6 +21,7 @@ def init_db():
     import models.recurring_series
     import models.activity_log
     import models.sms_code
+    import models.staff
     Base.metadata.create_all(bind=engine)
 
     # Migrate: add new columns to existing DBs

@@ -45,6 +45,10 @@
           <option value="{{ CULTIVATE_URL }}" style="color:#333;">Cultivate</option>
           <option value="{{ RALLY_URL }}" style="color:#333;">Rally</option>
         </select>
+        {% if current_staff %}
+        <span style="font-size:12px; color:rgba(255,255,255,0.55); padding:0 4px;">{{ current_staff.name }}</span>
+        <a href="/logout" class="nav-btn nav-btn-outline" style="font-size:12px;">Sign Out</a>
+        {% endif %}
       </div>
     </nav>
 

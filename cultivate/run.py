@@ -11,7 +11,7 @@ import os
 # Ensure app directory is on the Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from flask import Flask
+from flask import Flask, g, session, redirect, url_for, request
 from models.database import db_session, init_db
 from models.prospect import Prospect
 from routes import all_blueprints
@@ -35,6 +35,26 @@ def create_app():
             'RALLY_URL':     os.environ.get('RALLY_URL',     'http://localhost:5002'),
         }
 
+    # Staff auth guard — protect all management routes
+    @app.before_request
+    def require_staff_login():
+        public = ('/login', '/logout', '/static/')
+        if any(request.path.startswith(p) for p in public):
+            return None
+        if not session.get('staff_id'):
+            session['next_url'] = request.url
+            return redirect(url_for('staff_auth.login'))
+        from models.staff import Staff
+        g.staff = db_session.query(Staff).get(session['staff_id'])
+        if not g.staff or not g.staff.is_active:
+            session.pop('staff_id', None)
+            return redirect(url_for('staff_auth.login'))
+
+    # Inject staff into templates
+    @app.context_processor
+    def inject_staff():
+        return {'current_staff': getattr(g, 'staff', None)}
+
     # Teardown: remove DB session at end of each request
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -54,6 +74,17 @@ def main():
         print(f'  Imported {imported} prospects from Excel ({skipped} skipped)')
     else:
         print(f'  Database has {count} prospects')
+
+    # Seed default admin staff account if none exists
+    from models.staff import Staff
+    if db_session.query(Staff).count() == 0:
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@wfm.org')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'wfm2024')
+        admin = Staff(name='Admin', email=admin_email, role='admin')
+        admin.set_password(admin_password)
+        db_session.add(admin)
+        db_session.commit()
+        print(f'  Created default admin: {admin_email} / {admin_password}')
 
     app = create_app()
 
