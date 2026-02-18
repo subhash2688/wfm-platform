@@ -42,8 +42,8 @@
         <!-- Module switcher -->
         <select class="nav-btn nav-btn-outline" style="cursor:pointer; font-size:13px; padding:7px 12px; background:transparent; color:rgba(255,255,255,0.65); border:1.5px solid rgba(255,255,255,0.2); border-radius:8px;" onchange="if(this.value) window.location=this.value;" aria-label="Switch module">
           <option value="" selected disabled style="color:#333;">Switch module</option>
-          <option value="http://localhost:5001" style="color:#333;">Cultivate</option>
-          <option value="http://localhost:5002" style="color:#333;">Rally</option>
+          <option value="{{ CULTIVATE_URL }}" style="color:#333;">Cultivate</option>
+          <option value="{{ RALLY_URL }}" style="color:#333;">Rally</option>
         </select>
       </div>
     </nav>

@@ -27,6 +27,14 @@ def create_app():
     for bp in all_blueprints:
         app.register_blueprint(bp)
 
+    # Inject module URLs into every template
+    @app.context_processor
+    def inject_module_urls():
+        return {
+            'CULTIVATE_URL': os.environ.get('CULTIVATE_URL', 'http://localhost:5001'),
+            'RALLY_URL':     os.environ.get('RALLY_URL',     'http://localhost:5002'),
+        }
+
     # Teardown: remove DB session at end of each request
     @app.teardown_appcontext
     def shutdown_session(exception=None):
